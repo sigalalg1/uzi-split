@@ -13,12 +13,7 @@ export default function App() {
   ]);
   const [expenses, setExpenses] = useState([]);
 
-  const handleParticipantChange = (index) => {
-    const updated = [...participants];
-    updated[index].selected = !updated[index].selected;
-    setParticipants(updated);
-  };
-
+  
   const handlePercentageChange = (index, value) => {
     const updated = [...participants];
     updated[index].percentage = value;
