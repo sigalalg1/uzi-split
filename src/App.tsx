@@ -156,7 +156,7 @@ export default function App() {
   };
 
   const handleClearAll = () => {
-    if (confirm("Clear all saved expenses?")) {
+    if (window.confirm("Clear all saved expenses?")) {
       setExpenses([]);
       localStorage.removeItem(STORAGE_KEY);
     }
