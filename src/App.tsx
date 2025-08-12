@@ -2,16 +2,20 @@ import React, { useEffect, useState } from "react";
 
 // ==== Types ====
 type Currency = "₪" | "$" | "€";
+type SplitMode = "equal" | "percent" | "people";
 
 type Participant = {
   name: string;
   selected: boolean;
-  percentage: string; // keep as string for easy input; can be "" or a number-like string
+  percentage: string; // for splitMode = "percent"
+  people: string; // for splitMode = "people"
 };
 
-type SavedParticipant = {
+type SavedShare = {
   name: string;
-  percentage: string; // stored only for selected participants
+  shareAmount: number;
+  percentage?: number;
+  people?: number;
 };
 
 type Expense = {
@@ -19,57 +23,47 @@ type Expense = {
   payer: string;
   amount: number;
   currency: Currency;
-  participants: SavedParticipant[];
-  createdAt: string; // ISO
+  splitMode: SplitMode;
+  shares: SavedShare[];
+  createdAt: string;
 };
 
 // ==== Constants ====
 const STORAGE_KEY = "uzisplit:expenses";
+const FAMILIES = ["אלגרנטי", "כפיר", "קורן", "גורודצקי"];
+
+// ==== Helpers ====
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 // ==== Component ====
 export default function App() {
-  // Form state
-  const [payer, setPayer] = useState<string>("");
+  const [payer, setPayer] = useState<string>(FAMILIES[0]);
   const [amount, setAmount] = useState<string>("");
   const [currency, setCurrency] = useState<Currency>("₪");
-  const [participants, setParticipants] = useState<Participant[]>([
-    { name: "Family A", selected: false, percentage: "" },
-    { name: "Family B", selected: false, percentage: "" },
-    { name: "Family C", selected: false, percentage: "" },
-    { name: "Family D", selected: false, percentage: "" },
-    { name: "Family E", selected: false, percentage: "" },
-  ]);
+  const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  const [participants, setParticipants] = useState<Participant[]>(
+    FAMILIES.map((name) => ({ name, selected: false, percentage: "", people: "" }))
+  );
 
-  // Saved expenses
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
-  // Load from localStorage on first render
+  // Load from localStorage
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as unknown;
-        if (Array.isArray(parsed)) {
-          // naive validation
-          setExpenses(parsed as Expense[]);
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to read saved expenses", e);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Expense[];
+        if (Array.isArray(parsed)) setExpenses(parsed);
+      } catch {}
     }
   }, []);
 
-  // Persist to localStorage whenever expenses change
+  // Save to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-    } catch (e) {
-      console.warn("Failed to save expenses", e);
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
   }, [expenses]);
 
-  // Handlers
-  const handleParticipantToggle = (index: number): void => {
+  const handleParticipantToggle = (index: number) => {
     setParticipants((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], selected: !next[index].selected };
@@ -77,8 +71,7 @@ export default function App() {
     });
   };
 
-  const handleParticipantPercent = (index: number, value: string): void => {
-    // Allow empty or numeric input (including decimals)
+  const handleParticipantPercent = (index: number, value: string) => {
     if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setParticipants((prev) => {
         const next = [...prev];
@@ -88,42 +81,73 @@ export default function App() {
     }
   };
 
-  const resetForm = (): void => {
-    setPayer("");
-    setAmount("");
-    setCurrency("₪");
-    setParticipants((prev) =>
-      prev.map((p) => ({ ...p, selected: false, percentage: "" }))
-    );
+  const handleParticipantPeople = (index: number, value: string) => {
+    if (value === "" || /^[0-9]*$/.test(value)) {
+      setParticipants((prev) => {
+        const next = [...prev];
+        next[index] = { ...next[index], people: value };
+        return next;
+      });
+    }
   };
 
-  const handleSubmit = (): void => {
-    const selected = participants.filter((p) => p.selected);
+  const resetForm = () => {
+    setPayer(FAMILIES[0]);
+    setAmount("");
+    setCurrency("₪");
+    setSplitMode("equal");
+    setParticipants(FAMILIES.map((name) => ({ name, selected: false, percentage: "", people: "" })));
+  };
 
-    // Basic validation
-    if (!payer.trim()) {
-      alert("Please enter who paid (family name).");
-      return;
+  const computeShares = (amt: number, mode: SplitMode, selected: Participant[]): SavedShare[] | null => {
+    if (mode === "equal") {
+      const base = round2(amt / selected.length);
+      const shares = selected.map((p) => ({ name: p.name, shareAmount: base }));
+      const drift = round2(amt - shares.reduce((s, x) => s + x.shareAmount, 0));
+      if (shares.length) shares[shares.length - 1].shareAmount = round2(shares[shares.length - 1].shareAmount + drift);
+      return shares;
     }
-    const amt = Number(amount);
-    if (!amt || amt <= 0) {
-      alert("Please enter a valid amount.");
-      return;
+    if (mode === "percent") {
+      const nums = selected.map((p) => Number(p.percentage));
+      if (Math.abs(nums.reduce((s, n) => s + n, 0) - 100) > 0.01) return null;
+      const shares = selected.map((p) => {
+        const pct = Number(p.percentage) || 0;
+        return { name: p.name, percentage: pct, shareAmount: round2((pct / 100) * amt) };
+      });
+      const drift = round2(amt - shares.reduce((s, x) => s + x.shareAmount, 0));
+      if (shares.length) shares[shares.length - 1].shareAmount = round2(shares[shares.length - 1].shareAmount + drift);
+      return shares;
     }
-    if (selected.length === 0) {
-      alert("Please select at least one participating family.");
-      return;
+    if (mode === "people") {
+      const counts = selected.map((p) => Number(p.people));
+      const totalPeople = counts.reduce((s, n) => s + n, 0);
+      if (totalPeople <= 0) return null;
+      const shares = selected.map((p) => {
+        const c = Number(p.people);
+        return { name: p.name, people: c, shareAmount: round2((c / totalPeople) * amt) };
+      });
+      const drift = round2(amt - shares.reduce((s, x) => s + x.shareAmount, 0));
+      if (shares.length) shares[shares.length - 1].shareAmount = round2(shares[shares.length - 1].shareAmount + drift);
+      return shares;
     }
+    return null;
+  };
+
+  const handleSubmit = () => {
+    const selected = participants.filter((p) => p.selected);
+    if (!amount || Number(amount) <= 0) return alert("Enter valid amount");
+    if (!selected.length) return alert("Select at least one family");
+
+    const shares = computeShares(Number(amount), splitMode, selected);
+    if (!shares) return alert("Invalid split data");
 
     const newExpense: Expense = {
       id: Date.now(),
-      payer: payer.trim(),
-      amount: amt,
+      payer,
+      amount: Number(amount),
       currency,
-      participants: selected.map((p) => ({
-        name: p.name,
-        percentage: p.percentage, // may be "" if not specified
-      })),
+      splitMode,
+      shares,
       createdAt: new Date().toISOString(),
     };
 
@@ -131,158 +155,101 @@ export default function App() {
     resetForm();
   };
 
-  const handleClearAll = (): void => {
-    // eslint-disable-next-line no-restricted-globals
+  const handleClearAll = () => {
     if (confirm("Clear all saved expenses?")) {
       setExpenses([]);
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        // ignore
-      }
+      localStorage.removeItem(STORAGE_KEY);
     }
   };
 
-  // ---- Simple inline styles (works even if Tailwind isn't set up) ----
-  const wrap: React.CSSProperties = { maxWidth: 560, width: "100%", margin: "0 auto" };
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "10px",
-    border: "1px solid #ddd",
-    borderRadius: 6,
-  };
+  // ---- styles
+  const wrap: React.CSSProperties = { maxWidth: 560, margin: "0 auto" };
+  const inputStyle: React.CSSProperties = { width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: 6 };
   const sectionTitle: React.CSSProperties = { fontWeight: 600, margin: "8px 0" };
-  const button: React.CSSProperties = {
-    padding: "10px 14px",
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    cursor: "pointer",
-    background: "#fff",
-  };
-  const primary: React.CSSProperties = {
-    ...button,
-    color: "#fff",
-    background: "#2563eb",
-    border: "none",
-  };
+  const button: React.CSSProperties = { padding: "10px 14px", borderRadius: 6, border: "1px solid #ddd", cursor: "pointer" };
+  const primary: React.CSSProperties = { ...button, color: "#fff", background: "#2563eb", border: "none" };
+  const radioRow: React.CSSProperties = { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" };
 
   return (
-    <div style={{ minHeight: "100vh", padding: 16 }}>
+    <div style={{ padding: 16 }}>
       <div style={wrap}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Uzi Split</h1>
+        <h1>Uzi Split</h1>
 
         {/* --- Form --- */}
         <div style={{ display: "grid", gap: 10 }}>
-          <input
-            type="text"
-            placeholder="Who paid? (Family name)"
-            value={payer}
-            onChange={(e) => setPayer(e.target.value)}
-            style={inputStyle}
-          />
+          <select value={payer} onChange={(e) => setPayer(e.target.value)} style={inputStyle}>
+            {FAMILIES.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
 
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            style={inputStyle}
-          />
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} style={inputStyle} />
 
-          <select
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as Currency)}
-            style={inputStyle}
-          >
+          <select value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} style={inputStyle}>
             <option value="₪">₪ (Shekel)</option>
             <option value="$">$ (Dollar)</option>
             <option value="€">€ (Euro)</option>
           </select>
 
           <div>
-            <div style={sectionTitle}>Who participated:</div>
+            <div style={sectionTitle}>How to split:</div>
+            <div style={radioRow}>
+              <label>
+                <input type="radio" value="equal" checked={splitMode === "equal"} onChange={() => setSplitMode("equal")} /> Equal
+              </label>
+              <label>
+                <input type="radio" value="percent" checked={splitMode === "percent"} onChange={() => setSplitMode("percent")} /> %
+              </label>
+              <label>
+                <input type="radio" value="people" checked={splitMode === "people"} onChange={() => setSplitMode("people")} /> People
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div style={sectionTitle}>Participants:</div>
             {participants.map((p, i) => (
-              <div
-                key={p.name}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 6,
-                }}
-              >
-                <input
-                  id={`p_${i}`}
-                  type="checkbox"
-                  checked={p.selected}
-                  onChange={() => handleParticipantToggle(i)}
-                />
-                <label htmlFor={`p_${i}`} style={{ flex: 1 }}>
-                  {p.name}
-                </label>
-                {p.selected && (
-                  <input
-                    type="number"
-                    placeholder="%"
-                    value={p.percentage}
-                    onChange={(e) => handleParticipantPercent(i, e.target.value)}
-                    style={{ ...inputStyle, width: 80 }}
-                  />
+              <div key={p.name} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                <input type="checkbox" checked={p.selected} onChange={() => handleParticipantToggle(i)} />
+                <span style={{ flex: 1 }}>{p.name}</span>
+                {p.selected && splitMode === "percent" && (
+                  <input type="number" placeholder="%" value={p.percentage} onChange={(e) => handleParticipantPercent(i, e.target.value)} style={{ ...inputStyle, width: 80 }} />
+                )}
+                {p.selected && splitMode === "people" && (
+                  <input type="number" placeholder="people" value={p.people} onChange={(e) => handleParticipantPeople(i, e.target.value)} style={{ ...inputStyle, width: 100 }} />
                 )}
               </div>
             ))}
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={handleSubmit} style={primary}>
-              Add Expense
-            </button>
-            <button onClick={handleClearAll} style={button}>
-              Clear saved
-            </button>
+            <button onClick={handleSubmit} style={primary}>Add Expense</button>
+            <button onClick={handleClearAll} style={button}>Clear saved</button>
           </div>
         </div>
 
         {/* --- List --- */}
         <div style={{ marginTop: 18 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>
-            Expenses
-          </h2>
+          <h2>Expenses</h2>
           {expenses.length === 0 ? (
-            <p style={{ color: "#666" }}>
-              No expenses yet. Add your first one above.
-            </p>
+            <p>No expenses yet</p>
           ) : (
             expenses.map((exp) => (
-              <div
-                key={exp.id}
-                style={{
-                  border: "1px solid #eee",
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 10,
-                }}
-              >
+              <div key={exp.id} style={{ border: "1px solid #eee", borderRadius: 8, padding: 12, marginBottom: 10 }}>
                 <p>
-                  <strong>{exp.payer}</strong> paid{" "}
-                  <strong>
-                    {exp.amount} {exp.currency}
-                  </strong>{" "}
-                  <span style={{ color: "#888", fontSize: 12 }}>
-                    — {new Date(exp.createdAt).toLocaleString()}
-                  </span>
+                  <strong>{exp.payer}</strong> paid {exp.amount} {exp.currency} —{" "}
+                  {new Date(exp.createdAt).toLocaleString()}
                 </p>
-                <p style={{ fontSize: 14 }}>
-                  Shared by:
-                  {exp.participants.map((pp, idx) => (
-                    <span key={idx}>
-                      {" "}
-                      {pp.name}
-                      {pp.percentage && ` (${pp.percentage}%)`}
-                      {idx < exp.participants.length - 1 ? "," : ""}
-                    </span>
-                  ))}
-                </p>
+                <p>Split mode: {exp.splitMode}</p>
+                {exp.shares.map((s, idx) => (
+                  <div key={idx}>
+                    {s.name}: {s.shareAmount} {exp.currency}
+                    {exp.percentage ? ` (${s.percentage}%)` : ""}
+                    {exp.people ? ` (${s.people} people)` : ""}
+                  </div>
+                ))}
               </div>
             ))
           )}
