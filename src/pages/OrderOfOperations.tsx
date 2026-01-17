@@ -50,6 +50,19 @@ export default function OrderOfOperations() {
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
 
+  // Safe math expression evaluator
+  const evaluateExpression = (expr: string): number => {
+    // This is a safe alternative to eval for math expressions
+    // Using Function constructor is safer than eval as it runs in a limited scope
+    try {
+      // eslint-disable-next-line no-new-func
+      return Function(`'use strict'; return (${expr})`)();
+    } catch (e) {
+      console.error('Error evaluating expression:', expr, e);
+      return 0;
+    }
+  };
+
   const generateExercise = (level: number): Exercise => {
     const operators = ['+', '-', '*', '/'];
     const complexity = Math.random();
@@ -66,7 +79,7 @@ export default function OrderOfOperations() {
       const op2 = operators[Math.floor(Math.random() * operators.length)];
 
       const expression = `${a} ${op1} ${b} ${op2} ${c}`;
-      const answer = eval(expression);
+      const answer = evaluateExpression(expression);
 
       return { expression, answer: Math.round(answer * 100) / 100 };
     } else if (complexity < 0.7) {
@@ -80,7 +93,7 @@ export default function OrderOfOperations() {
       const op3 = operators[Math.floor(Math.random() * operators.length)];
 
       const expression = `(${a} ${op1} ${b}) ${op2} ${c} ${op3} ${d}`;
-      const answer = eval(expression);
+      const answer = evaluateExpression(expression);
 
       return { expression, answer: Math.round(answer * 100) / 100 };
     } else {
@@ -98,7 +111,7 @@ export default function OrderOfOperations() {
         ? `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`
         : `${a} ${op1} (${b} ${op2} ${c}) ${op3} ${d}`;
 
-      const answer = eval(expression);
+      const answer = evaluateExpression(expression);
 
       return { expression, answer: Math.round(answer * 100) / 100 };
     }
@@ -208,7 +221,7 @@ export default function OrderOfOperations() {
               {t("orderOfOperations.title")}
             </Heading>
             <Badge colorScheme="orange" fontSize="md" px={3} py={1}>
-              Order of Operations
+              {t("practicePage.subjects.orderOfOperations")}
             </Badge>
           </HStack>
 

@@ -12,6 +12,11 @@
       "difficultyLevel": "Difficulty Level",
       "selectQuestions": "How many questions?",
       "selectDifficulty": "Select difficulty level:",
+      "subjects": {
+        "addition": "Addition",
+        "orderOfOperations": "Order of Operations",
+        "fractions": "Fractions"
+      },
       "exercises": {
         "addWithoutConversion": "Addition Without Conversion",
         "addWithConversion": "Addition With Conversion",

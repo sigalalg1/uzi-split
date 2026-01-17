@@ -299,7 +299,7 @@ export default function FractionTest() {
               {t("fractionTest.title")}
             </Heading>
             <Badge colorScheme="purple" fontSize="md" px={3} py={1}>
-              Fractions
+              {t("practicePage.subjects.fractions")}
             </Badge>
           </HStack>
 

@@ -34,21 +34,21 @@ export default function Layout({ children }: LayoutProps) {
   const getBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
     const breadcrumbs = [{ name: t("app.title"), path: "/" }];
-
+    
     let currentPath = "";
     paths.forEach((path, index) => {
       currentPath += `/${path}`;
       let name = path;
-
+      
       // Translate known paths
       if (path === "practice") {
         name = t("app.practice");
       } else if (path === "addition") {
-        name = "Addition";
+        name = t("practicePage.subjects.addition");
       } else if (path === "fractions") {
-        name = "Fractions";
+        name = t("practicePage.subjects.fractions");
       } else if (path === "order-of-operations") {
-        name = "Order of Operations";
+        name = t("practicePage.subjects.orderOfOperations");
       } else if (path === "add-without-conversion") {
         name = t("practicePage.exercises.addWithoutConversion");
       } else if (path === "add-with-conversion") {
@@ -56,10 +56,10 @@ export default function Layout({ children }: LayoutProps) {
       } else if (path === "fraction") {
         name = t("practicePage.exercises.fraction");
       }
-
+      
       breadcrumbs.push({ name, path: currentPath });
     });
-
+    
     return breadcrumbs;
   };
 

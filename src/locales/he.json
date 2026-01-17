@@ -12,6 +12,11 @@
       "difficultyLevel": "רמת קושי",
       "selectQuestions": "כמה שאלות?",
       "selectDifficulty": "בחר רמת קושי:",
+      "subjects": {
+        "addition": "חיבור",
+        "orderOfOperations": "סדר פעולות",
+        "fractions": "שברים"
+      },
       "exercises": {
         "addWithoutConversion": "חיבור ללא המרה",
         "addWithConversion": "חיבור עם המרה",
