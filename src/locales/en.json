@@ -1,10 +1,36 @@
 {
   "translation": {
     "app": {
-      "title": "Math Place",
+      "title": "Mathemiko",
       "login": "Login",
       "test": "Test",
       "practice": "Practice"
+    },
+    "fractionTest": {
+      "title": "Shaded Area - Fractions, Decimals & Percentages",
+      "back": "Back",
+      "selectCount": "How many questions would you like to practice?",
+      "questions": "Questions",
+      "progress": "Progress",
+      "score": "Score",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "squareDivided": "The square below is divided into {{total}} equal small squares.",
+      "squaresShaded": "{{count}} of them are shaded.",
+      "whichRepresent": "Which of the following options represent the shaded part?",
+      "selectAll": "Select all correct answers:",
+      "checkAnswers": "Check Answers",
+      "perfect": "Perfect!",
+      "perfectDesc": "You found all the correct answers!",
+      "notQuite": "Not quite!",
+      "notQuiteDesc": "Review the correct answers below.",
+      "perfectScore": "🎉 Perfect Score!",
+      "greatJob": "🌟 Great Job!",
+      "wellDone": "👏 Well Done!",
+      "keepPracticing": "💪 Keep Practicing!",
+      "testComplete": "Test Complete!",
+      "startNew": "Start New Test",
+      "backToTests": "Back to Tests"
     },
     "expenseSplitter": {
       "title": "Uzi Split",
