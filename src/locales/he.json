@@ -1,0 +1,40 @@
+{
+  "translation": {
+    "app": {
+      "title": "מקום למתמטיקה",
+      "login": "התחברות",
+      "test": "מבחן",
+      "practice": "תרגול"
+    },
+    "expenseSplitter": {
+      "title": "חלוקת הוצאות אוזי",
+      "whoPaid": "מי שילם? (שם משפחה)",
+      "amount": "סכום",
+      "currency": {
+        "shekel": "₪ (שקל)",
+        "dollar": "$ (דולר)",
+        "euro": "€ (יורו)"
+      },
+      "whoParticipated": "מי השתתף:",
+      "addExpense": "הוסף הוצאה",
+      "clearSaved": "נקה שמורים",
+      "expenses": "הוצאות",
+      "noExpenses": "אין הוצאות עדיין. הוסף את הראשונה למעלה.",
+      "paid": "שילם",
+      "sharedBy": "משותף עם:",
+      "alerts": {
+        "enterPayer": "אנא הזן מי שילם (שם משפחה).",
+        "enterAmount": "אנא הזן סכום תקין.",
+        "selectParticipant": "אנא בחר לפחות משפחה אחת משתתפת.",
+        "confirmClear": "למחוק את כל ההוצאות השמורות?"
+      },
+      "families": {
+        "familyA": "משפחה א",
+        "familyB": "משפחה ב",
+        "familyC": "משפחה ג",
+        "familyD": "משפחה ד",
+        "familyE": "משפחה ה"
+      }
+    }
+  }
+}

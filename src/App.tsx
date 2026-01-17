@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 export default function App() {
+  const { t } = useTranslation();
   const handleLogin = () => {
     console.log("Login clicked");
     // TODO: Implement login functionality
@@ -69,11 +72,13 @@ export default function App() {
 
   return (
     <div style={container}>
+      <LanguageSwitcher />
+
       <button style={loginButton} onClick={handleLogin}>
-        Login
+        {t("app.login")}
       </button>
 
-      <h1 style={title}>Math Place</h1>
+      <h1 style={title}>{t("app.title")}</h1>
 
       <div style={buttonContainer}>
         <button
@@ -82,7 +87,7 @@ export default function App() {
           onMouseEnter={(e) => (e.currentTarget.style.background = "#1d4ed8")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "#2563eb")}
         >
-          Test
+          {t("app.test")}
         </button>
 
         <button
@@ -91,7 +96,7 @@ export default function App() {
           onMouseEnter={(e) => (e.currentTarget.style.background = "#1d4ed8")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "#2563eb")}
         >
-          Practice
+          {t("app.practice")}
         </button>
       </div>
     </div>
