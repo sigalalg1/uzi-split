@@ -53,6 +53,10 @@ export default function Layout({ children }: LayoutProps) {
         name = t("practicePage.exercises.addWithoutConversion");
       } else if (path === "add-with-conversion") {
         name = t("practicePage.exercises.addWithConversion");
+      } else if (path === "fraction-addition") {
+        name = t("practicePage.exercises.fractionAddition");
+      } else if (path === "least-common-denominator") {
+        name = t("practicePage.exercises.leastCommonDenominator");
       } else if (path === "fraction") {
         name = t("practicePage.exercises.fraction");
       }

@@ -428,7 +428,12 @@ export default function FractionTest() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { setMaxQuestions(null); setDifficulty(null); }}
+              onClick={() => { 
+                setMaxQuestions(null); 
+                setDifficulty(null);
+                setSelectedOptions(new Set());
+                setTempCount(null);
+              }}
               colorScheme="purple"
               size="lg"
               flex={1}
@@ -509,8 +514,6 @@ export default function FractionTest() {
             <VStack spacing={3}>
               <Text fontSize="md" fontWeight="bold" color="gray.700">
                 {t("fractionTest.squareDivided", { total: currentQuestion.totalCount })}
-                <br />
-                {t("fractionTest.squaresShaded", { count: currentQuestion.shadedCount })}
               </Text>
 
               {/* Visual Grid */}

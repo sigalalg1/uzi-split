@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import Practice from "./pages/Practice";
 import AddWithoutConversion from "./pages/AddWithoutConversion";
 import OrderOfOperations from "./pages/OrderOfOperations";
+import FractionAddition from "./pages/FractionAddition";
+import LeastCommonDenominator from "./pages/LeastCommonDenominator";
 import FractionTest from "./pages/FractionTest";
 
 export default function App() {
@@ -16,6 +18,8 @@ export default function App() {
         <Route path="/practice/addition/add-without-conversion" element={<AddWithoutConversion />} />
         <Route path="/practice/addition/add-with-conversion" element={<div style={{ padding: 20 }}>Coming soon...</div>} />
         <Route path="/practice/order-of-operations/order-of-operations" element={<OrderOfOperations />} />
+        <Route path="/practice/fractions/fraction-addition" element={<FractionAddition />} />
+        <Route path="/practice/fractions/least-common-denominator" element={<LeastCommonDenominator />} />
         <Route path="/practice/fractions/fraction" element={<FractionTest />} />
         <Route path="/practice/:subject/:testName" element={<div style={{ padding: 20 }}>Practice page coming soon...</div>} />
       </Routes>

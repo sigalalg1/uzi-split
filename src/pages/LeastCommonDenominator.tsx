@@ -5,24 +5,23 @@ import {
   Box,
   Button,
   Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Input,
-  Progress,
-  useToast,
-  Badge,
   Flex,
+  Heading,
+  HStack,
+  VStack,
+  Text,
+  Badge,
+  Progress,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
 type Exercise = {
-  num1: number;
-  num2: number;
-  answer: number;
+  denominators: number[];
+  lcd: number;
 };
 
 type CompletedExercise = Exercise & {
@@ -31,10 +30,10 @@ type CompletedExercise = Exercise & {
   timestamp: number;
 };
 
-export default function AddWithoutConversion() {
+export default function LeastCommonDenominator() {
   const navigate = useNavigate();
-  const toast = useToast();
   const { t } = useTranslation();
+  const toast = useToast();
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -51,45 +50,68 @@ export default function AddWithoutConversion() {
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
 
-  const generateExercise = (level: number): Exercise => {
-    // Generate based on difficulty level (1-5)
-    let num1, num2, maxNum;
+  // GCD function
+  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 
+  // LCM function
+  const lcm = (a: number, b: number): number => (a * b) / gcd(a, b);
+
+  // LCM for multiple numbers
+  const lcmMultiple = (numbers: number[]): number => {
+    return numbers.reduce((acc, num) => lcm(acc, num), 1);
+  };
+
+  const generateExercise = (level: number): Exercise => {
+    let denominators: number[];
+    
+    // Determine number of fractions based on difficulty
+    const numFractions = level >= 4 ? 3 : 2;
+    
     switch (level) {
-      case 1: // Very easy: 1-4, sum < 6
-        num1 = Math.floor(Math.random() * 4) + 1;
-        maxNum = Math.min(5 - num1, 4);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+      case 1: // Very easy: small numbers, easy LCD
+        denominators = [];
+        const base1 = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+        denominators.push(base1);
+        denominators.push(base1 * (Math.floor(Math.random() * 2) + 2)); // Multiple of first
         break;
-      case 2: // Easy: 1-5, sum < 8
-        num1 = Math.floor(Math.random() * 5) + 1;
-        maxNum = Math.min(7 - num1, 5);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        
+      case 2: // Easy: small numbers
+        denominators = [];
+        for (let i = 0; i < numFractions; i++) {
+          denominators.push(Math.floor(Math.random() * 5) + 2); // 2-6
+        }
         break;
-      case 3: // Medium: 1-6, sum < 10
-        num1 = Math.floor(Math.random() * 6) + 1;
-        maxNum = Math.min(9 - num1, 6);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        
+      case 3: // Medium: larger numbers
+        denominators = [];
+        for (let i = 0; i < numFractions; i++) {
+          denominators.push(Math.floor(Math.random() * 7) + 3); // 3-9
+        }
         break;
-      case 4: // Hard: 1-8, sum < 12
-        num1 = Math.floor(Math.random() * 8) + 1;
-        maxNum = Math.min(11 - num1, 8);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        
+      case 4: // Hard: 3 numbers, larger range
+        denominators = [];
+        for (let i = 0; i < 3; i++) {
+          denominators.push(Math.floor(Math.random() * 8) + 4); // 4-11
+        }
         break;
-      case 5: // Very hard: 1-10, sum < 15
-        num1 = Math.floor(Math.random() * 10) + 1;
-        maxNum = Math.min(14 - num1, 10);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        
+      case 5: // Very hard: 3 numbers, largest range
+        denominators = [];
+        for (let i = 0; i < 3; i++) {
+          denominators.push(Math.floor(Math.random() * 10) + 5); // 5-14
+        }
         break;
+        
       default:
-        num1 = Math.floor(Math.random() * 5) + 1;
-        num2 = Math.floor(Math.random() * (9 - num1)) + 1;
+        denominators = [2, 3];
     }
 
+    const lcd = lcmMultiple(denominators);
+
     return {
-      num1,
-      num2,
-      answer: num1 + num2,
+      denominators,
+      lcd,
     };
   };
 
@@ -106,7 +128,6 @@ export default function AddWithoutConversion() {
     setIsGameComplete(false);
   };
 
-  // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerRunning) {
@@ -124,14 +145,10 @@ export default function AddWithoutConversion() {
   };
 
   const handleHistoryClick = (exercise: CompletedExercise) => {
-    // Load the exercise from history
     setCurrentExercise({
-      num1: exercise.num1,
-      num2: exercise.num2,
-      answer: exercise.answer,
+      denominators: exercise.denominators,
+      lcd: exercise.lcd,
     });
-    
-    // Clear inputs for retry
     setUserAnswer("");
     setShowFeedback(false);
     setIsCorrect(null);
@@ -141,12 +158,11 @@ export default function AddWithoutConversion() {
     if (!currentExercise || userAnswer === "") return;
 
     const parsedAnswer = parseInt(userAnswer);
-    const isAnswerCorrect = parsedAnswer === currentExercise.answer;
+    const isAnswerCorrect = parsedAnswer === currentExercise.lcd;
     setIsCorrect(isAnswerCorrect);
     setShowFeedback(true);
     setTotalQuestions(totalQuestions + 1);
 
-    // Add to completed exercises
     const completedExercise: CompletedExercise = {
       ...currentExercise,
       userAnswer: parsedAnswer,
@@ -160,7 +176,7 @@ export default function AddWithoutConversion() {
       setStreak(streak + 1);
 
       toast({
-        title: streak >= 2 ? `🎉 ${streak + 1} ${t("additionTest.inARow")}` : `✅ ${t("additionTest.correct")}`,
+        title: streak >= 2 ? `🎉 ${streak + 1} ${t("leastCommonDenominator.inARow")}` : `✅ ${t("leastCommonDenominator.correct")}`,
         status: "success",
         duration: 1500,
         isClosable: true,
@@ -170,8 +186,8 @@ export default function AddWithoutConversion() {
       setStreak(0);
 
       toast({
-        title: `❌ ${t("additionTest.notQuite")}`,
-        description: `${t("additionTest.answerIs")} ${currentExercise.answer}`,
+        title: `❌ ${t("leastCommonDenominator.notQuite")}`,
+        description: `${t("leastCommonDenominator.answerIs")} ${currentExercise.lcd}`,
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -179,17 +195,13 @@ export default function AddWithoutConversion() {
       });
     }
 
-    // Check if game is complete
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
       setTimeout(() => {
         setShowFeedback(false);
-        setIsCorrect(null);
-        setUserAnswer("");
-      }, 1500);
+      }, 2000);
     } else {
-      // Move to next question after a delay
       setTimeout(() => {
         setShowFeedback(false);
         setIsCorrect(null);
@@ -211,11 +223,11 @@ export default function AddWithoutConversion() {
       <Container maxW="container.md" py={8}>
         <VStack spacing={8}>
           <HStack justify="center" spacing={4}>
-            <Heading textAlign="center" color="blue.600" size="lg">
-              {t("additionTest.title")}
+            <Heading textAlign="center" color="teal.600" size="lg">
+              {t("leastCommonDenominator.title")}
             </Heading>
-            <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
-              {t("practicePage.subjects.addition")}
+            <Badge colorScheme="teal" fontSize="md" px={3} py={1}>
+              {t("practicePage.subjects.fractions")}
             </Badge>
           </HStack>
 
@@ -231,7 +243,7 @@ export default function AddWithoutConversion() {
                   <Button
                     key={count}
                     onClick={() => setTempCount(count)}
-                    colorScheme="blue"
+                    colorScheme="teal"
                     size="lg"
                     fontSize="2xl"
                     width="100px"
@@ -258,13 +270,13 @@ export default function AddWithoutConversion() {
                   <Button
                     key={level}
                     onClick={() => startGame(tempCount, level)}
-                    colorScheme="blue"
+                    colorScheme="teal"
                     variant="outline"
                     size="lg"
                     fontSize="3xl"
                     width="100px"
                     height="100px"
-                    _hover={{ transform: "scale(1.05)", bg: "blue.50" }}
+                    _hover={{ transform: "scale(1.05)", bg: "teal.50" }}
                     transition="all 0.2s"
                   >
                     {level}
@@ -277,7 +289,7 @@ export default function AddWithoutConversion() {
                 colorScheme="gray"
                 variant="ghost"
               >
-                ← {t("additionTest.back")}
+                ← {t("leastCommonDenominator.back")}
               </Button>
             </>
           )}
@@ -290,7 +302,7 @@ export default function AddWithoutConversion() {
   if (isGameComplete) {
     const percentage = Math.round((score / totalQuestions) * 100);
     return (
-      <Container maxW="container.md" py={8}>
+      <Container maxW="container.lg" py={8}>
         <VStack spacing={8}>
           <MotionBox
             initial={{ scale: 0 }}
@@ -298,7 +310,13 @@ export default function AddWithoutConversion() {
             transition={{ type: "spring", duration: 0.5 }}
           >
             <Heading size="2xl" textAlign="center">
-              {percentage === 100 ? t("additionTest.perfectScore") : percentage >= 80 ? t("additionTest.greatJob") : percentage >= 60 ? t("additionTest.wellDone") : t("additionTest.keepPracticing")}
+              {percentage === 100
+                ? t("leastCommonDenominator.perfectScore")
+                : percentage >= 80
+                  ? t("leastCommonDenominator.greatJob")
+                  : percentage >= 60
+                    ? t("leastCommonDenominator.wellDone")
+                    : t("leastCommonDenominator.keepPracticing")}
             </Heading>
           </MotionBox>
 
@@ -308,32 +326,46 @@ export default function AddWithoutConversion() {
             borderRadius="2xl"
             shadow="2xl"
             borderWidth={3}
-            borderColor="blue.400"
+            borderColor="teal.400"
             width="100%"
           >
             <VStack spacing={6}>
               <Heading size="lg" color="gray.700">
-                {t("additionTest.testComplete")}
+                {t("leastCommonDenominator.testComplete")}
               </Heading>
 
-              <HStack spacing={8} fontSize="3xl" fontWeight="bold">
+              <HStack spacing={12} fontSize="xl" flexWrap="wrap" justify="center">
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.score")}</Text>
-                  <Text color="blue.600">{score}/{totalQuestions}</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("leastCommonDenominator.yourScore")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="teal.600">
+                    {score}/{totalQuestions}
+                  </Text>
                 </VStack>
+
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.accuracy")}</Text>
-                  <Text color="green.600">{percentage}%</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("leastCommonDenominator.accuracy")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="teal.600">
+                    {percentage}%
+                  </Text>
                 </VStack>
+
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.time")}</Text>
-                  <Text color="purple.600">{formatTime(elapsedTime)}</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("leastCommonDenominator.time")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="teal.600">
+                    {formatTime(elapsedTime)}
+                  </Text>
                 </VStack>
               </HStack>
 
               <Progress
                 value={percentage}
-                colorScheme={percentage >= 80 ? "green" : percentage >= 60 ? "yellow" : "red"}
+                colorScheme="teal"
                 size="lg"
                 borderRadius="full"
                 width="100%"
@@ -343,17 +375,17 @@ export default function AddWithoutConversion() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { 
-                setMaxExercises(null); 
+              onClick={() => {
+                setMaxExercises(null);
                 setDifficulty(null);
                 setUserAnswer("");
                 setTempCount(null);
               }}
-              colorScheme="blue"
+              colorScheme="teal"
               size="lg"
               flex={1}
             >
-              {t("additionTest.startNew")}
+              {t("leastCommonDenominator.startNew")}
             </Button>
             <Button
               onClick={() => navigate("/practice")}
@@ -362,51 +394,9 @@ export default function AddWithoutConversion() {
               size="lg"
               flex={1}
             >
-              {t("additionTest.backToTests")}
+              {t("leastCommonDenominator.backToTests")}
             </Button>
           </HStack>
-
-          {/* Show completed exercises */}
-          <Box width="100%">
-            <Heading size="md" mb={4} color="gray.600">
-              Review Your Answers
-            </Heading>
-            <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
-              {completedExercises.map((exercise) => (
-                <Box
-                  key={exercise.timestamp}
-                  p={4}
-                  borderRadius="lg"
-                  bg={exercise.isCorrect ? "green.50" : "red.50"}
-                  borderWidth={2}
-                  borderColor={exercise.isCorrect ? "green.200" : "red.200"}
-                >
-                  <Flex justify="space-between" align="center">
-                    <HStack spacing={4} fontSize="2xl" fontWeight="bold">
-                      <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
-                        {exercise.isCorrect ? "✓" : "✗"}
-                      </Text>
-                      <Text color="blue.500">{exercise.num1}</Text>
-                      <Text color="gray.500">+</Text>
-                      <Text color="purple.500">{exercise.num2}</Text>
-                      <Text color="gray.500">=</Text>
-                      <Text
-                        color={exercise.isCorrect ? "green.600" : "red.600"}
-                        textDecoration={exercise.isCorrect ? "none" : "line-through"}
-                      >
-                        {exercise.userAnswer}
-                      </Text>
-                      {!exercise.isCorrect && (
-                        <Text color="green.600" fontSize="lg">
-                          (correct: {exercise.answer})
-                        </Text>
-                      )}
-                    </HStack>
-                  </Flex>
-                </Box>
-              ))}
-            </VStack>
-          </Box>
         </VStack>
       </Container>
     );
@@ -424,16 +414,16 @@ export default function AddWithoutConversion() {
               ⏱️ {formatTime(elapsedTime)}
             </Badge>
             <Badge colorScheme="purple" fontSize="lg" px={4} py={2} borderRadius="full">
-              🔥 {t("additionTest.streak")}: {streak}
+              🔥 {t("leastCommonDenominator.streak")}: {streak}
             </Badge>
           </HStack>
         </Flex>
 
         <HStack justify="center" spacing={4}>
-          <Heading textAlign="center" color="blue.600" size="lg">
-            {t("additionTest.title")}
+          <Heading textAlign="center" color="teal.600" size="lg">
+            {t("leastCommonDenominator.title")}
           </Heading>
-          <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
+          <Badge colorScheme="teal" fontSize="md" px={3} py={1}>
             {t("practicePage.difficultyLevel")} {difficulty}
           </Badge>
         </HStack>
@@ -442,15 +432,16 @@ export default function AddWithoutConversion() {
         <Box>
           <Flex justify="space-between" mb={2}>
             <Text fontWeight="bold">
-              {t("additionTest.progress")}: {totalQuestions}/{maxExercises}
+              {t("leastCommonDenominator.progress")}: {totalQuestions}/{maxExercises}
             </Text>
             <Text fontWeight="bold">
-              {t("additionTest.score")}: {score}/{totalQuestions} ({totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
+              {t("leastCommonDenominator.score")}: {score}/{totalQuestions} (
+              {totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
             </Text>
           </Flex>
           <Progress
             value={maxExercises ? (totalQuestions / maxExercises) * 100 : 0}
-            colorScheme="blue"
+            colorScheme="teal"
             size="lg"
             borderRadius="full"
           />
@@ -460,7 +451,7 @@ export default function AddWithoutConversion() {
         <MotionBox
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          key={`${currentExercise.num1}-${currentExercise.num2}`}
+          key={`${currentExercise.denominators.join('-')}-${totalQuestions}`}
           transition={{ duration: 0.3 }}
         >
           <Box
@@ -477,67 +468,55 @@ export default function AddWithoutConversion() {
                 ? isCorrect
                   ? "green.400"
                   : "red.400"
-                : "blue.400"
+                : "teal.400"
             }
             borderRadius="2xl"
             p={12}
             shadow="2xl"
             transition="all 0.3s"
           >
-            <VStack spacing={8}>
-              {/* Numbers with animation */}
-              <HStack spacing={8} fontSize="8xl" fontWeight="bold">
-                <MotionBox
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0],
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                  }}
-                >
-                  <Text color="blue.500">{currentExercise.num1}</Text>
-                </MotionBox>
+            <VStack spacing={6}>
+              {/* Question */}
+              <Text fontSize="xl" fontWeight="bold" color="gray.700" textAlign="center">
+                {t("leastCommonDenominator.question")}
+              </Text>
 
-                <Text color="gray.600">+</Text>
+              {/* Denominators Display */}
+              <HStack spacing={4} fontSize="4xl" fontWeight="bold" flexWrap="wrap" justify="center">
+                {currentExercise.denominators.map((denom, index) => (
+                  <React.Fragment key={index}>
+                    <VStack spacing={0}>
+                      <Text color="teal.500">1</Text>
+                      <Box width="40px" height="3px" bg="teal.500" />
+                      <Text color="teal.500">{denom}</Text>
+                    </VStack>
+                    {index < currentExercise.denominators.length - 1 && (
+                      <Text color="gray.400">,</Text>
+                    )}
+                  </React.Fragment>
+                ))}
+              </HStack>
 
-                <MotionBox
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, -5, 5, 0],
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                    delay: 0.2,
-                  }}
-                >
-                  <Text color="purple.500">{currentExercise.num2}</Text>
-                </MotionBox>
-
-                <Text color="gray.600">=</Text>
-
-                {/* Answer Input */}
+              {/* Answer Input */}
+              <HStack spacing={4} fontSize="2xl">
+                <Text color="gray.600">{t("leastCommonDenominator.lcd")} =</Text>
                 <Input
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="?"
-                  size="lg"
-                  fontSize="7xl"
+                  size="md"
+                  fontSize="3xl"
                   fontWeight="bold"
                   textAlign="center"
-                  width="200px"
+                  width="150px"
                   autoFocus
                   type="number"
                   borderWidth={3}
-                  borderColor="orange.400"
+                  borderColor="teal.400"
                   _focus={{
-                    borderColor: "orange.500",
-                    boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.3)",
+                    borderColor: "teal.500",
+                    boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
                   }}
                   disabled={showFeedback}
                 />
@@ -546,16 +525,16 @@ export default function AddWithoutConversion() {
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                colorScheme="blue"
+                colorScheme="teal"
                 size="lg"
-                fontSize="2xl"
-                px={12}
-                py={8}
+                fontSize="xl"
+                px={8}
+                py={6}
                 isDisabled={userAnswer === "" || showFeedback}
                 _hover={{ transform: "scale(1.05)" }}
                 transition="all 0.2s"
               >
-                {t("additionTest.checkAnswer")}
+                {t("leastCommonDenominator.checkAnswer")}
               </Button>
             </VStack>
           </Box>
@@ -573,10 +552,10 @@ export default function AddWithoutConversion() {
         >
           <Text textAlign="center" fontSize="xl" color="gray.500">
             {streak >= 5
-              ? t("additionTest.onFire")
+              ? t("leastCommonDenominator.onFire")
               : streak >= 3
-                ? t("additionTest.amazing")
-                : t("additionTest.typeAnswer")}
+                ? t("leastCommonDenominator.amazing")
+                : t("leastCommonDenominator.typeAnswer")}
           </Text>
         </MotionBox>
 
@@ -584,10 +563,10 @@ export default function AddWithoutConversion() {
         {completedExercises.length > 0 && (
           <Box mt={8}>
             <Heading size="md" mb={4} color="gray.600">
-              {t("additionTest.completedExercises")}
+              {t("leastCommonDenominator.completedExercises")}
             </Heading>
-            <VStack spacing={2} align="stretch">
-              {completedExercises.map((exercise, index) => (
+            <VStack spacing={2} align="stretch" maxH="300px" overflowY="auto">
+              {completedExercises.map((exercise) => (
                 <MotionBox
                   key={exercise.timestamp}
                   initial={{ opacity: 0, x: -20 }}
@@ -604,17 +583,16 @@ export default function AddWithoutConversion() {
                     _hover={{ opacity: 1, transform: "scale(1.02)", cursor: "pointer" }}
                     transition="all 0.2s"
                     onClick={() => handleHistoryClick(exercise)}
-                    title={t("additionTest.clickToRetry")}
+                    title={t("leastCommonDenominator.clickToRetry")}
                   >
-                    <Flex justify="space-between" align="center">
-                      <HStack spacing={4} fontSize="2xl" fontWeight="bold">
+                    <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                      <HStack spacing={3} fontSize="lg" fontWeight="bold" flexWrap="wrap">
                         <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                           {exercise.isCorrect ? "✓" : "✗"}
                         </Text>
-                        <Text color="blue.500">{exercise.num1}</Text>
-                        <Text color="gray.500">+</Text>
-                        <Text color="purple.500">{exercise.num2}</Text>
-                        <Text color="gray.500">=</Text>
+                        <Text color="gray.700">
+                          LCD({exercise.denominators.join(", ")}) =
+                        </Text>
                         <Text
                           color={exercise.isCorrect ? "green.600" : "red.600"}
                           textDecoration={exercise.isCorrect ? "none" : "line-through"}
@@ -622,8 +600,8 @@ export default function AddWithoutConversion() {
                           {exercise.userAnswer}
                         </Text>
                         {!exercise.isCorrect && (
-                          <Text color="green.600" fontSize="lg">
-                            (correct: {exercise.answer})
+                          <Text color="green.600" fontSize="md">
+                            (correct: {exercise.lcd})
                           </Text>
                         )}
                       </HStack>

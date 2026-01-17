@@ -37,6 +37,9 @@ export default function OrderOfOperations() {
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
+  const [numerator, setNumerator] = useState("");
+  const [denominator, setDenominator] = useState("");
+  const [answerMode, setAnswerMode] = useState<"decimal" | "fraction">("decimal");
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -146,18 +149,60 @@ export default function OrderOfOperations() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleSubmit = () => {
-    if (!currentExercise || userAnswer === "") return;
+  const handleHistoryClick = (exercise: CompletedExercise) => {
+    // Load the exercise from history
+    setCurrentExercise({
+      expression: exercise.expression,
+      answer: exercise.answer,
+    });
+    
+    // Clear inputs for retry
+    setUserAnswer("");
+    setNumerator("");
+    setDenominator("");
+    setShowFeedback(false);
+    setIsCorrect(null);
+  };
 
-    const parsedAnswer = parseInt(userAnswer);
-    const isAnswerCorrect = parsedAnswer === currentExercise.answer;
+  const checkAnswer = (): { isCorrect: boolean; userAnswerValue: number } => {
+    if (!currentExercise) return { isCorrect: false, userAnswerValue: 0 };
+
+    let userAnswerValue: number;
+    
+    if (answerMode === "decimal") {
+      // Decimal mode
+      if (userAnswer === "") return { isCorrect: false, userAnswerValue: 0 };
+      userAnswerValue = parseFloat(userAnswer);
+    } else {
+      // Fraction mode
+      if (numerator === "" || denominator === "" || denominator === "0") {
+        return { isCorrect: false, userAnswerValue: 0 };
+      }
+      userAnswerValue = parseFloat(numerator) / parseFloat(denominator);
+    }
+
+    // Check if answer is correct (with small tolerance for floating point)
+    const tolerance = 0.01;
+    const isCorrect = Math.abs(userAnswerValue - currentExercise.answer) < tolerance;
+    
+    return { isCorrect, userAnswerValue };
+  };
+
+  const handleSubmit = () => {
+    if (!currentExercise) return;
+    
+    // Check if user has entered an answer
+    if (answerMode === "decimal" && userAnswer === "") return;
+    if (answerMode === "fraction" && (numerator === "" || denominator === "")) return;
+
+    const { isCorrect: isAnswerCorrect, userAnswerValue } = checkAnswer();
     setIsCorrect(isAnswerCorrect);
     setShowFeedback(true);
     setTotalQuestions(totalQuestions + 1);
 
     const completedExercise: CompletedExercise = {
       ...currentExercise,
-      userAnswer: parsedAnswer,
+      userAnswer: userAnswerValue,
       isCorrect: isAnswerCorrect,
       timestamp: Date.now(),
     };
@@ -200,13 +245,23 @@ export default function OrderOfOperations() {
         setShowFeedback(false);
         setIsCorrect(null);
         setUserAnswer("");
+        setNumerator("");
+        setDenominator("");
         setCurrentExercise(generateExercise(difficulty!));
       }, 1500);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent, nextInputRef?: React.RefObject<HTMLInputElement>) => {
     if (e.key === "Enter") {
+      if (answerMode === "fraction" && nextInputRef?.current && e.currentTarget === document.activeElement) {
+        // If in fraction mode and on numerator, move to denominator
+        const target = e.currentTarget as HTMLInputElement;
+        if (target.name === "numerator" && numerator !== "") {
+          nextInputRef.current?.focus();
+          return;
+        }
+      }
       handleSubmit();
     }
   };
@@ -349,7 +404,14 @@ export default function OrderOfOperations() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { setMaxExercises(null); setDifficulty(null); }}
+              onClick={() => { 
+                setMaxExercises(null); 
+                setDifficulty(null);
+                setUserAnswer("");
+                setNumerator("");
+                setDenominator("");
+                setTempCount(null);
+              }}
               colorScheme="orange"
               size="lg"
               flex={1}
@@ -382,8 +444,10 @@ export default function OrderOfOperations() {
                   borderWidth={2}
                   borderColor={exercise.isCorrect ? "green.200" : "red.200"}
                   opacity={0.7}
-                  _hover={{ opacity: 1 }}
-                  transition="opacity 0.2s"
+                  _hover={{ opacity: 1, transform: "scale(1.02)", cursor: "pointer" }}
+                  transition="all 0.2s"
+                  onClick={() => handleHistoryClick(exercise)}
+                  title={t("orderOfOperations.clickToRetry")}
                 >
                   <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
                     <HStack spacing={2} fontSize="lg" fontWeight="bold" flexWrap="wrap">
@@ -507,28 +571,116 @@ export default function OrderOfOperations() {
 
                 <Text color="gray.600">=</Text>
 
-                {/* Answer Input */}
-                <Input
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="?"
-                  size="md"
-                  fontSize="3xl"
-                  fontWeight="bold"
-                  textAlign="center"
-                  width="150px"
-                  autoFocus
-                  type="number"
-                  step="0.01"
-                  borderWidth={3}
-                  borderColor="teal.400"
-                  _focus={{
-                    borderColor: "teal.500",
-                    boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
+                {/* Answer Input - Decimal or Fraction */}
+                {answerMode === "decimal" ? (
+                  <Input
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e)}
+                    placeholder="?"
+                    size="md"
+                    fontSize="3xl"
+                    fontWeight="bold"
+                    textAlign="center"
+                    width="150px"
+                    autoFocus
+                    type="number"
+                    step="0.01"
+                    borderWidth={3}
+                    borderColor="teal.400"
+                    _focus={{
+                      borderColor: "teal.500",
+                      boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
+                    }}
+                    disabled={showFeedback}
+                  />
+                ) : (
+                  <VStack spacing={1} align="center">
+                    <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                      {t("orderOfOperations.numerator")}
+                    </Text>
+                    <Input
+                      name="numerator"
+                      value={numerator}
+                      onChange={(e) => setNumerator(e.target.value)}
+                      onKeyPress={(e) => {
+                        const denominatorRef = { current: document.querySelector('input[name="denominator"]') as HTMLInputElement };
+                        handleKeyPress(e, denominatorRef);
+                      }}
+                      placeholder="?"
+                      size="sm"
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      textAlign="center"
+                      width="120px"
+                      autoFocus
+                      type="number"
+                      borderWidth={2}
+                      borderColor="teal.400"
+                      _focus={{
+                        borderColor: "teal.500",
+                        boxShadow: "0 0 0 2px rgba(45, 212, 191, 0.3)",
+                      }}
+                      disabled={showFeedback}
+                    />
+                    <Box width="120px" height="3px" bg="gray.600" my={1} />
+                    <Input
+                      name="denominator"
+                      value={denominator}
+                      onChange={(e) => setDenominator(e.target.value)}
+                      onKeyPress={(e) => handleKeyPress(e)}
+                      placeholder="?"
+                      size="sm"
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      textAlign="center"
+                      width="120px"
+                      type="number"
+                      borderWidth={2}
+                      borderColor="teal.400"
+                      _focus={{
+                        borderColor: "teal.500",
+                        boxShadow: "0 0 0 2px rgba(45, 212, 191, 0.3)",
+                      }}
+                      disabled={showFeedback}
+                    />
+                    <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                      {t("orderOfOperations.denominator")}
+                    </Text>
+                  </VStack>
+                )}
+              </HStack>
+
+              {/* Answer Mode Toggle */}
+              <HStack spacing={2}>
+                <Button
+                  size="sm"
+                  variant={answerMode === "decimal" ? "solid" : "outline"}
+                  colorScheme="teal"
+                  onClick={() => {
+                    setAnswerMode("decimal");
+                    setUserAnswer("");
+                    setNumerator("");
+                    setDenominator("");
                   }}
                   disabled={showFeedback}
-                />
+                >
+                  {t("orderOfOperations.decimal")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={answerMode === "fraction" ? "solid" : "outline"}
+                  colorScheme="teal"
+                  onClick={() => {
+                    setAnswerMode("fraction");
+                    setUserAnswer("");
+                    setNumerator("");
+                    setDenominator("");
+                  }}
+                  disabled={showFeedback}
+                >
+                  {t("orderOfOperations.fraction")}
+                </Button>
               </HStack>
 
               {/* Submit Button */}
@@ -589,8 +741,10 @@ export default function OrderOfOperations() {
                     borderWidth={2}
                     borderColor={exercise.isCorrect ? "green.200" : "red.200"}
                     opacity={0.7}
-                    _hover={{ opacity: 1 }}
-                    transition="opacity 0.2s"
+                    _hover={{ opacity: 1, transform: "scale(1.02)", cursor: "pointer" }}
+                    transition="all 0.2s"
+                    onClick={() => handleHistoryClick(exercise)}
+                    title={t("orderOfOperations.clickToRetry")}
                   >
                     <Flex justify="space-between" align="center">
                       <HStack spacing={4} fontSize="2xl" fontWeight="bold">
