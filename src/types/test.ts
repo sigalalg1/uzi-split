@@ -1,12 +1,12 @@
 export type TestItem = {
-  level: number;
+  subject: string;
   name: string;
   text: string;
   url: string;
 };
 
-export type TestLevel = {
-  level: number;
+export type TestSubject = {
+  subject: string;
   tests: TestItem[];
 };
 

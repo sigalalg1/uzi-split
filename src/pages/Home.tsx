@@ -7,12 +7,12 @@ export default function Home() {
   const { t } = useTranslation();
 
   const handleTest = () => {
-    navigate("/test");
+    console.log("Test clicked");
+    // TODO: Implement test functionality
   };
 
   const handlePractice = () => {
-    console.log("Practice clicked");
-    // TODO: Implement practice functionality
+    navigate("/practice");
   };
 
   // Styles

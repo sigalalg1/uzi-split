@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { testData } from "../data/tests";
-import { TestLevel } from "../types/test";
+import { TestSubject } from "../types/test";
 
-export default function Test() {
+export default function Practice() {
   const navigate = useNavigate();
-  const [expandedLevels, setExpandedLevels] = useState<Set<number>>(
-    new Set([10])
+  const { t } = useTranslation();
+  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(
+    new Set(["Addition", "Order of Operations", "Fractions"])
   );
 
-  const toggleLevel = (level: number) => {
-    setExpandedLevels((prev) => {
+  const toggleSubject = (subject: string) => {
+    setExpandedSubjects((prev) => {
       const next = new Set(prev);
-      if (next.has(level)) {
-        next.delete(level);
+      if (next.has(subject)) {
+        next.delete(subject);
       } else {
-        next.add(level);
+        next.add(subject);
       }
       return next;
     });
@@ -127,21 +129,18 @@ export default function Test() {
   return (
     <div style={container}>
       <div style={header}>
-        <button style={backButton} onClick={handleBack}>
-          ← Back
-        </button>
-        <h1 style={title}>Math Tests</h1>
+        <h1 style={title}>{t("practicePage.title")}</h1>
       </div>
 
       <div style={treeContainer}>
-        {testData.map((levelData: TestLevel) => {
-          const isExpanded = expandedLevels.has(levelData.level);
+        {testData.map((subjectData: TestSubject) => {
+          const isExpanded = expandedSubjects.has(subjectData.subject);
 
           return (
-            <div key={levelData.level} style={levelContainer}>
+            <div key={subjectData.subject} style={levelContainer}>
               <div
                 style={levelHeader}
-                onClick={() => toggleLevel(levelData.level)}
+                onClick={() => toggleSubject(subjectData.subject)}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "#e5e7eb")
                 }
@@ -149,7 +148,7 @@ export default function Test() {
                   (e.currentTarget.style.background = "#f3f4f6")
                 }
               >
-                <span>Level {levelData.level}</span>
+                <span>{subjectData.subject}</span>
                 <span
                   style={{
                     ...arrow,
@@ -162,7 +161,7 @@ export default function Test() {
 
               {isExpanded && (
                 <div style={testList}>
-                  {levelData.tests.map((test) => (
+                  {subjectData.tests.map((test) => (
                     <div
                       key={test.name}
                       style={testItem}
@@ -175,7 +174,7 @@ export default function Test() {
                       }
                     >
                       <div style={testIcon}></div>
-                      <span style={testText}>{test.text}</span>
+                      <span style={testText}>{t(test.text)}</span>
                     </div>
                   ))}
                 </div>

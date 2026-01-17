@@ -77,11 +77,34 @@ export default function FractionTest() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [maxQuestions, setMaxQuestions] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<number | null>(null);
+  const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
 
-  const generateQuestion = (): Question => {
-    // Generate a percentage that has nice fraction equivalents
-    const percentages = [10, 20, 25, 30, 40, 50, 60, 70, 75, 80];
+  const generateQuestion = (level: number): Question => {
+    // Generate percentages based on difficulty level
+    let percentages: number[];
+
+    switch (level) {
+      case 1: // Very easy: 25, 50, 75
+        percentages = [25, 50, 75];
+        break;
+      case 2: // Easy: common halves and quarters
+        percentages = [10, 20, 25, 50, 75, 80];
+        break;
+      case 3: // Medium: include more variety
+        percentages = [10, 20, 25, 30, 40, 50, 60, 70, 75, 80];
+        break;
+      case 4: // Hard: include thirds
+        percentages = [10, 15, 20, 25, 30, 33, 40, 50, 60, 66, 70, 75, 80, 85];
+        break;
+      case 5: // Very hard: include more complex fractions
+        percentages = [5, 10, 12, 15, 20, 25, 30, 33, 37, 40, 50, 60, 62, 66, 70, 75, 80, 85, 87, 90];
+        break;
+      default:
+        percentages = [10, 20, 25, 30, 40, 50, 60, 70, 75, 80];
+    }
+
     const percentage = percentages[Math.floor(Math.random() * percentages.length)];
     const totalCount = 100;
     const shadedCount = percentage;
@@ -160,9 +183,10 @@ export default function FractionTest() {
     };
   };
 
-  const startGame = (count: number) => {
+  const startGame = (count: number, level: number) => {
     setMaxQuestions(count);
-    setCurrentQuestion(generateQuestion());
+    setDifficulty(level);
+    setCurrentQuestion(generateQuestion(level));
     setIsTimerRunning(true);
     setScore(0);
     setTotalQuestions(0);
@@ -260,50 +284,88 @@ export default function FractionTest() {
       setTimeout(() => {
         setShowFeedback(false);
         setSelectedOptions(new Set());
-        setCurrentQuestion(generateQuestion());
+        setCurrentQuestion(generateQuestion(difficulty!));
       }, 2000);
     }
   };
 
-  // Exercise count selection screen
-  if (!maxQuestions) {
+  // Question count and difficulty selection screen
+  if (!maxQuestions || !difficulty) {
     return (
-      <Container maxW="container.md" py={8}>
-        <VStack spacing={8}>
-          <Button
-            onClick={() => navigate("/test")}
-            colorScheme="gray"
-            variant="outline"
-            alignSelf="flex-start"
-          >
-            ← {t("fractionTest.back")}
-          </Button>
+      <Container maxW="container.md" py={6}>
+        <VStack spacing={6}>
+          <HStack justify="center" spacing={4}>
+            <Heading textAlign="center" color="purple.600" size="md">
+              {t("fractionTest.title")}
+            </Heading>
+            <Badge colorScheme="purple" fontSize="md" px={3} py={1}>
+              Fractions
+            </Badge>
+          </HStack>
 
-          <Heading textAlign="center" color="purple.600" size="xl">
-            {t("fractionTest.title")}
-          </Heading>
+          {/* Question Count Selection */}
+          {!tempCount && (
+            <>
+              <Text fontSize="lg" color="gray.600" textAlign="center" fontWeight="bold">
+                {t("practicePage.selectQuestions")}
+              </Text>
 
-          <Text fontSize="xl" color="gray.600" textAlign="center">
-            {t("fractionTest.selectCount")}
-          </Text>
+              <HStack spacing={3} flexWrap="wrap" justify="center">
+                {[5, 10, 15, 20, 25].map((count) => (
+                  <Button
+                    key={count}
+                    onClick={() => setTempCount(count)}
+                    colorScheme="purple"
+                    size="md"
+                    fontSize="xl"
+                    width="80px"
+                    height="80px"
+                    _hover={{ transform: "scale(1.05)" }}
+                    transition="all 0.2s"
+                  >
+                    {count}
+                  </Button>
+                ))}
+              </HStack>
+            </>
+          )}
 
-          <VStack spacing={4} width="100%" maxW="400px">
-            {[5, 10, 25, 50, 100].map((count) => (
+          {/* Difficulty Level Selection */}
+          {tempCount && (
+            <>
+              <Text fontSize="lg" color="gray.600" textAlign="center" fontWeight="bold">
+                {t("practicePage.selectDifficulty")}
+              </Text>
+
+              <HStack spacing={3} flexWrap="wrap" justify="center">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <Button
+                    key={level}
+                    onClick={() => startGame(tempCount, level)}
+                    colorScheme="purple"
+                    variant="outline"
+                    size="md"
+                    fontSize="2xl"
+                    width="80px"
+                    height="80px"
+                    _hover={{ transform: "scale(1.05)", bg: "purple.50" }}
+                    transition="all 0.2s"
+                  >
+                    {level}
+                  </Button>
+                ))}
+              </HStack>
+
               <Button
-                key={count}
-                onClick={() => startGame(count)}
-                colorScheme="purple"
-                size="lg"
-                width="100%"
-                fontSize="2xl"
-                py={8}
-                _hover={{ transform: "scale(1.05)" }}
-                transition="all 0.2s"
+                onClick={() => setTempCount(null)}
+                colorScheme="gray"
+                variant="ghost"
+                size="sm"
               >
-                {count} {t("fractionTest.questions")}
+                ← {t("fractionTest.back")}
               </Button>
-            ))}
-          </VStack>
+            </>
+          )}
         </VStack>
       </Container>
     );
@@ -366,7 +428,7 @@ export default function FractionTest() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => setMaxQuestions(null)}
+              onClick={() => { setMaxQuestions(null); setDifficulty(null); }}
               colorScheme="purple"
               size="lg"
               flex={1}
@@ -374,7 +436,7 @@ export default function FractionTest() {
               {t("fractionTest.startNew")}
             </Button>
             <Button
-              onClick={() => navigate("/test")}
+              onClick={() => navigate("/practice")}
               colorScheme="gray"
               variant="outline"
               size="lg"
@@ -394,15 +456,7 @@ export default function FractionTest() {
     <Container maxW="container.lg" py={4}>
       <VStack spacing={3} align="stretch">
         {/* Header */}
-        <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
-          <Button
-            onClick={() => navigate("/test")}
-            colorScheme="gray"
-            variant="outline"
-          >
-            ← {t("fractionTest.back")}
-          </Button>
-
+        <Flex justify="flex-end" align="center" wrap="wrap" gap={2}>
           <HStack spacing={4}>
             <Badge colorScheme="blue" fontSize="lg" px={4} py={2} borderRadius="full">
               ⏱️ {formatTime(elapsedTime)}
@@ -410,9 +464,14 @@ export default function FractionTest() {
           </HStack>
         </Flex>
 
-        <Heading textAlign="center" color="purple.600" size="lg">
-          {t("fractionTest.title")}
-        </Heading>
+        <HStack justify="center" spacing={4}>
+          <Heading textAlign="center" color="purple.600" size="md">
+            {t("fractionTest.title")}
+          </Heading>
+          <Badge colorScheme="purple" fontSize="md" px={3} py={1}>
+            {t("practicePage.difficultyLevel")} {difficulty}
+          </Badge>
+        </HStack>
 
         {/* Progress */}
         <Box>

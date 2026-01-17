@@ -20,8 +20,7 @@ import { motion } from "framer-motion";
 const MotionBox = motion(Box);
 
 type Exercise = {
-  num1: number;
-  num2: number;
+  expression: string;
   answer: number;
 };
 
@@ -31,7 +30,7 @@ type CompletedExercise = Exercise & {
   timestamp: number;
 };
 
-export default function AddWithoutConversion() {
+export default function OrderOfOperations() {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation();
@@ -52,45 +51,57 @@ export default function AddWithoutConversion() {
   const [isGameComplete, setIsGameComplete] = useState(false);
 
   const generateExercise = (level: number): Exercise => {
-    // Generate based on difficulty level (1-5)
-    let num1, num2, maxNum;
+    const operators = ['+', '-', '*', '/'];
+    const complexity = Math.random();
 
-    switch (level) {
-      case 1: // Very easy: 1-4, sum < 6
-        num1 = Math.floor(Math.random() * 4) + 1;
-        maxNum = Math.min(5 - num1, 4);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 2: // Easy: 1-5, sum < 8
-        num1 = Math.floor(Math.random() * 5) + 1;
-        maxNum = Math.min(7 - num1, 5);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 3: // Medium: 1-6, sum < 10
-        num1 = Math.floor(Math.random() * 6) + 1;
-        maxNum = Math.min(9 - num1, 6);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 4: // Hard: 1-8, sum < 12
-        num1 = Math.floor(Math.random() * 8) + 1;
-        maxNum = Math.min(11 - num1, 8);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 5: // Very hard: 1-10, sum < 15
-        num1 = Math.floor(Math.random() * 10) + 1;
-        maxNum = Math.min(14 - num1, 10);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      default:
-        num1 = Math.floor(Math.random() * 5) + 1;
-        num2 = Math.floor(Math.random() * (9 - num1)) + 1;
+    // Adjust number ranges based on difficulty level
+    const maxNum = level === 1 ? 5 : level === 2 ? 8 : level === 3 ? 10 : level === 4 ? 12 : 15;
+
+    if (complexity < 0.3) {
+      // Simple: a op b op c (3 numbers, 2 operators)
+      const a = Math.floor(Math.random() * maxNum) + 1;
+      const b = Math.floor(Math.random() * maxNum) + 1;
+      const c = Math.floor(Math.random() * maxNum) + 1;
+      const op1 = operators[Math.floor(Math.random() * operators.length)];
+      const op2 = operators[Math.floor(Math.random() * operators.length)];
+
+      const expression = `${a} ${op1} ${b} ${op2} ${c}`;
+      const answer = eval(expression);
+
+      return { expression, answer: Math.round(answer * 100) / 100 };
+    } else if (complexity < 0.7) {
+      // Medium: (a op b) op c op d (4 numbers, with parentheses)
+      const a = Math.floor(Math.random() * Math.max(maxNum - 2, 5)) + 1;
+      const b = Math.floor(Math.random() * Math.max(maxNum - 2, 5)) + 1;
+      const c = Math.floor(Math.random() * Math.max(maxNum - 2, 5)) + 1;
+      const d = Math.floor(Math.random() * Math.max(maxNum - 2, 5)) + 1;
+      const op1 = operators[Math.floor(Math.random() * operators.length)];
+      const op2 = operators[Math.floor(Math.random() * operators.length)];
+      const op3 = operators[Math.floor(Math.random() * operators.length)];
+
+      const expression = `(${a} ${op1} ${b}) ${op2} ${c} ${op3} ${d}`;
+      const answer = eval(expression);
+
+      return { expression, answer: Math.round(answer * 100) / 100 };
+    } else {
+      // Complex: a op (b op c) op d or (a op b) op (c op d)
+      const a = Math.floor(Math.random() * Math.max(maxNum - 4, 5)) + 1;
+      const b = Math.floor(Math.random() * Math.max(maxNum - 4, 5)) + 1;
+      const c = Math.floor(Math.random() * Math.max(maxNum - 4, 5)) + 1;
+      const d = Math.floor(Math.random() * Math.max(maxNum - 4, 5)) + 1;
+      const op1 = operators[Math.floor(Math.random() * operators.length)];
+      const op2 = operators[Math.floor(Math.random() * operators.length)];
+      const op3 = operators[Math.floor(Math.random() * operators.length)];
+
+      const useDoubleParens = Math.random() > 0.5;
+      const expression = useDoubleParens
+        ? `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`
+        : `${a} ${op1} (${b} ${op2} ${c}) ${op3} ${d}`;
+
+      const answer = eval(expression);
+
+      return { expression, answer: Math.round(answer * 100) / 100 };
     }
-
-    return {
-      num1,
-      num2,
-      answer: num1 + num2,
-    };
   };
 
   const startGame = (count: number, level: number) => {
@@ -106,7 +117,6 @@ export default function AddWithoutConversion() {
     setIsGameComplete(false);
   };
 
-  // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerRunning) {
@@ -132,7 +142,6 @@ export default function AddWithoutConversion() {
     setShowFeedback(true);
     setTotalQuestions(totalQuestions + 1);
 
-    // Add to completed exercises
     const completedExercise: CompletedExercise = {
       ...currentExercise,
       userAnswer: parsedAnswer,
@@ -146,7 +155,7 @@ export default function AddWithoutConversion() {
       setStreak(streak + 1);
 
       toast({
-        title: streak >= 2 ? `🎉 ${streak + 1} ${t("additionTest.inARow")}` : `✅ ${t("additionTest.correct")}`,
+        title: streak >= 2 ? `🎉 ${streak + 1} ${t("orderOfOperations.inARow")}` : `✅ ${t("orderOfOperations.correct")}`,
         status: "success",
         duration: 1500,
         isClosable: true,
@@ -156,8 +165,8 @@ export default function AddWithoutConversion() {
       setStreak(0);
 
       toast({
-        title: `❌ ${t("additionTest.notQuite")}`,
-        description: `${t("additionTest.answerIs")} ${currentExercise.answer}`,
+        title: `❌ ${t("orderOfOperations.notQuite")}`,
+        description: `${t("orderOfOperations.answerIs")} ${currentExercise.answer}`,
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -165,7 +174,6 @@ export default function AddWithoutConversion() {
       });
     }
 
-    // Check if game is complete
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
@@ -175,7 +183,6 @@ export default function AddWithoutConversion() {
         setUserAnswer("");
       }, 1500);
     } else {
-      // Move to next question after a delay
       setTimeout(() => {
         setShowFeedback(false);
         setIsCorrect(null);
@@ -197,11 +204,11 @@ export default function AddWithoutConversion() {
       <Container maxW="container.md" py={8}>
         <VStack spacing={8}>
           <HStack justify="center" spacing={4}>
-            <Heading textAlign="center" color="blue.600" size="lg">
-              {t("additionTest.title")}
+            <Heading textAlign="center" color="orange.600" size="lg">
+              {t("orderOfOperations.title")}
             </Heading>
-            <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
-              Addition
+            <Badge colorScheme="orange" fontSize="md" px={3} py={1}>
+              Order of Operations
             </Badge>
           </HStack>
 
@@ -217,7 +224,7 @@ export default function AddWithoutConversion() {
                   <Button
                     key={count}
                     onClick={() => setTempCount(count)}
-                    colorScheme="blue"
+                    colorScheme="orange"
                     size="lg"
                     fontSize="2xl"
                     width="100px"
@@ -244,13 +251,13 @@ export default function AddWithoutConversion() {
                   <Button
                     key={level}
                     onClick={() => startGame(tempCount, level)}
-                    colorScheme="blue"
+                    colorScheme="orange"
                     variant="outline"
                     size="lg"
                     fontSize="3xl"
                     width="100px"
                     height="100px"
-                    _hover={{ transform: "scale(1.05)", bg: "blue.50" }}
+                    _hover={{ transform: "scale(1.05)", bg: "orange.50" }}
                     transition="all 0.2s"
                   >
                     {level}
@@ -263,7 +270,7 @@ export default function AddWithoutConversion() {
                 colorScheme="gray"
                 variant="ghost"
               >
-                ← {t("additionTest.back")}
+                ← {t("orderOfOperations.back")}
               </Button>
             </>
           )}
@@ -284,7 +291,7 @@ export default function AddWithoutConversion() {
             transition={{ type: "spring", duration: 0.5 }}
           >
             <Heading size="2xl" textAlign="center">
-              {percentage === 100 ? t("additionTest.perfectScore") : percentage >= 80 ? t("additionTest.greatJob") : percentage >= 60 ? t("additionTest.wellDone") : t("additionTest.keepPracticing")}
+              {percentage === 100 ? t("orderOfOperations.perfectScore") : percentage >= 80 ? t("orderOfOperations.greatJob") : percentage >= 60 ? t("orderOfOperations.wellDone") : t("orderOfOperations.keepPracticing")}
             </Heading>
           </MotionBox>
 
@@ -294,26 +301,26 @@ export default function AddWithoutConversion() {
             borderRadius="2xl"
             shadow="2xl"
             borderWidth={3}
-            borderColor="blue.400"
+            borderColor="orange.400"
             width="100%"
           >
             <VStack spacing={6}>
               <Heading size="lg" color="gray.700">
-                {t("additionTest.testComplete")}
+                {t("orderOfOperations.testComplete")}
               </Heading>
 
               <HStack spacing={8} fontSize="3xl" fontWeight="bold">
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.score")}</Text>
-                  <Text color="blue.600">{score}/{totalQuestions}</Text>
+                  <Text color="gray.500" fontSize="lg">{t("orderOfOperations.score")}</Text>
+                  <Text color="orange.600">{score}/{totalQuestions}</Text>
                 </VStack>
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.accuracy")}</Text>
+                  <Text color="gray.500" fontSize="lg">{t("orderOfOperations.accuracy")}</Text>
                   <Text color="green.600">{percentage}%</Text>
                 </VStack>
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.time")}</Text>
-                  <Text color="purple.600">{formatTime(elapsedTime)}</Text>
+                  <Text color="gray.500" fontSize="lg">{t("orderOfOperations.time")}</Text>
+                  <Text color="blue.600">{formatTime(elapsedTime)}</Text>
                 </VStack>
               </HStack>
 
@@ -330,11 +337,11 @@ export default function AddWithoutConversion() {
           <HStack spacing={4} width="100%">
             <Button
               onClick={() => { setMaxExercises(null); setDifficulty(null); }}
-              colorScheme="blue"
+              colorScheme="orange"
               size="lg"
               flex={1}
             >
-              {t("additionTest.startNew")}
+              {t("orderOfOperations.startNew")}
             </Button>
             <Button
               onClick={() => navigate("/practice")}
@@ -343,14 +350,14 @@ export default function AddWithoutConversion() {
               size="lg"
               flex={1}
             >
-              {t("additionTest.backToTests")}
+              {t("orderOfOperations.backToTests")}
             </Button>
           </HStack>
 
           {/* Show completed exercises */}
           <Box width="100%">
             <Heading size="md" mb={4} color="gray.600">
-              Review Your Answers
+              {t("orderOfOperations.completedExercises")}
             </Heading>
             <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
               {completedExercises.map((exercise) => (
@@ -361,15 +368,16 @@ export default function AddWithoutConversion() {
                   bg={exercise.isCorrect ? "green.50" : "red.50"}
                   borderWidth={2}
                   borderColor={exercise.isCorrect ? "green.200" : "red.200"}
+                  opacity={0.7}
+                  _hover={{ opacity: 1 }}
+                  transition="opacity 0.2s"
                 >
-                  <Flex justify="space-between" align="center">
-                    <HStack spacing={4} fontSize="2xl" fontWeight="bold">
+                  <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                    <HStack spacing={2} fontSize="lg" fontWeight="bold" flexWrap="wrap">
                       <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                         {exercise.isCorrect ? "✓" : "✗"}
                       </Text>
-                      <Text color="blue.500">{exercise.num1}</Text>
-                      <Text color="gray.500">+</Text>
-                      <Text color="purple.500">{exercise.num2}</Text>
+                      <Text color="gray.700">{exercise.expression}</Text>
                       <Text color="gray.500">=</Text>
                       <Text
                         color={exercise.isCorrect ? "green.600" : "red.600"}
@@ -378,11 +386,14 @@ export default function AddWithoutConversion() {
                         {exercise.userAnswer}
                       </Text>
                       {!exercise.isCorrect && (
-                        <Text color="green.600" fontSize="lg">
+                        <Text color="green.600" fontSize="md">
                           (correct: {exercise.answer})
                         </Text>
                       )}
                     </HStack>
+                    <Badge colorScheme={exercise.isCorrect ? "green" : "red"}>
+                      {exercise.isCorrect ? "Correct" : "Wrong"}
+                    </Badge>
                   </Flex>
                 </Box>
               ))}
@@ -405,16 +416,16 @@ export default function AddWithoutConversion() {
               ⏱️ {formatTime(elapsedTime)}
             </Badge>
             <Badge colorScheme="purple" fontSize="lg" px={4} py={2} borderRadius="full">
-              🔥 {t("additionTest.streak")}: {streak}
+              🔥 {t("orderOfOperations.streak")}: {streak}
             </Badge>
           </HStack>
         </Flex>
 
         <HStack justify="center" spacing={4}>
-          <Heading textAlign="center" color="blue.600" size="lg">
-            {t("additionTest.title")}
+          <Heading textAlign="center" color="orange.600" size="lg">
+            {t("orderOfOperations.title")}
           </Heading>
-          <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
+          <Badge colorScheme="orange" fontSize="md" px={3} py={1}>
             {t("practicePage.difficultyLevel")} {difficulty}
           </Badge>
         </HStack>
@@ -423,15 +434,15 @@ export default function AddWithoutConversion() {
         <Box>
           <Flex justify="space-between" mb={2}>
             <Text fontWeight="bold">
-              {t("additionTest.progress")}: {totalQuestions}/{maxExercises}
+              {t("orderOfOperations.progress")}: {totalQuestions}/{maxExercises}
             </Text>
             <Text fontWeight="bold">
-              {t("additionTest.score")}: {score}/{totalQuestions} ({totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
+              {t("orderOfOperations.score")}: {score}/{totalQuestions} ({totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
             </Text>
           </Flex>
           <Progress
             value={maxExercises ? (totalQuestions / maxExercises) * 100 : 0}
-            colorScheme="blue"
+            colorScheme="orange"
             size="lg"
             borderRadius="full"
           />
@@ -441,7 +452,7 @@ export default function AddWithoutConversion() {
         <MotionBox
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          key={`${currentExercise.num1}-${currentExercise.num2}`}
+          key={`${currentExercise.expression}-${totalQuestions}`}
           transition={{ duration: 0.3 }}
         >
           <Box
@@ -458,45 +469,27 @@ export default function AddWithoutConversion() {
                 ? isCorrect
                   ? "green.400"
                   : "red.400"
-                : "blue.400"
+                : "orange.400"
             }
             borderRadius="2xl"
             p={12}
             shadow="2xl"
             transition="all 0.3s"
           >
-            <VStack spacing={8}>
-              {/* Numbers with animation */}
-              <HStack spacing={8} fontSize="8xl" fontWeight="bold">
+            <VStack spacing={6}>
+              {/* Expression with animation */}
+              <HStack spacing={4} fontSize="4xl" fontWeight="bold" flexWrap="wrap" justify="center">
                 <MotionBox
                   animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 1],
                   }}
                   transition={{
-                    duration: 0.5,
+                    duration: 1,
                     repeat: Infinity,
-                    repeatDelay: 3,
+                    repeatDelay: 2,
                   }}
                 >
-                  <Text color="blue.500">{currentExercise.num1}</Text>
-                </MotionBox>
-
-                <Text color="gray.600">+</Text>
-
-                <MotionBox
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, -5, 5, 0],
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                    delay: 0.2,
-                  }}
-                >
-                  <Text color="purple.500">{currentExercise.num2}</Text>
+                  <Text color="orange.500">{currentExercise.expression}</Text>
                 </MotionBox>
 
                 <Text color="gray.600">=</Text>
@@ -507,18 +500,19 @@ export default function AddWithoutConversion() {
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="?"
-                  size="lg"
-                  fontSize="7xl"
+                  size="md"
+                  fontSize="3xl"
                   fontWeight="bold"
                   textAlign="center"
-                  width="200px"
+                  width="150px"
                   autoFocus
                   type="number"
+                  step="0.01"
                   borderWidth={3}
-                  borderColor="orange.400"
+                  borderColor="teal.400"
                   _focus={{
-                    borderColor: "orange.500",
-                    boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.3)",
+                    borderColor: "teal.500",
+                    boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
                   }}
                   disabled={showFeedback}
                 />
@@ -527,16 +521,16 @@ export default function AddWithoutConversion() {
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                colorScheme="blue"
-                size="lg"
-                fontSize="2xl"
-                px={12}
-                py={8}
+                colorScheme="orange"
+                size="md"
+                fontSize="lg"
+                px={8}
+                py={4}
                 isDisabled={userAnswer === "" || showFeedback}
                 _hover={{ transform: "scale(1.05)" }}
                 transition="all 0.2s"
               >
-                {t("additionTest.checkAnswer")}
+                {t("orderOfOperations.checkAnswer")}
               </Button>
             </VStack>
           </Box>
@@ -554,10 +548,10 @@ export default function AddWithoutConversion() {
         >
           <Text textAlign="center" fontSize="xl" color="gray.500">
             {streak >= 5
-              ? t("additionTest.onFire")
+              ? t("orderOfOperations.onFire")
               : streak >= 3
-                ? t("additionTest.amazing")
-                : t("additionTest.typeAnswer")}
+                ? t("orderOfOperations.amazing")
+                : t("orderOfOperations.typeAnswer")}
           </Text>
         </MotionBox>
 
@@ -565,10 +559,10 @@ export default function AddWithoutConversion() {
         {completedExercises.length > 0 && (
           <Box mt={8}>
             <Heading size="md" mb={4} color="gray.600">
-              {t("additionTest.completedExercises")}
+              {t("orderOfOperations.completedExercises")}
             </Heading>
             <VStack spacing={2} align="stretch">
-              {completedExercises.map((exercise, index) => (
+              {completedExercises.map((exercise) => (
                 <MotionBox
                   key={exercise.timestamp}
                   initial={{ opacity: 0, x: -20 }}
@@ -590,9 +584,7 @@ export default function AddWithoutConversion() {
                         <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                           {exercise.isCorrect ? "✓" : "✗"}
                         </Text>
-                        <Text color="blue.500">{exercise.num1}</Text>
-                        <Text color="gray.500">+</Text>
-                        <Text color="purple.500">{exercise.num2}</Text>
+                        <Text color="gray.700">{exercise.expression}</Text>
                         <Text color="gray.500">=</Text>
                         <Text
                           color={exercise.isCorrect ? "green.600" : "red.600"}

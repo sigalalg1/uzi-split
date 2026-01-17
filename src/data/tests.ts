@@ -1,31 +1,42 @@
-import { TestLevel } from "../types/test";
+import { TestSubject } from "../types/test";
 
-export const testData: TestLevel[] = [
+export const testData: TestSubject[] = [
   {
-    level: 10,
+    subject: "Addition",
     tests: [
       {
-        level: 10,
+        subject: "Addition",
         name: "add-without-conversion",
-        text: "Addition Without Conversion",
-        url: "/test/10/add-without-conversion",
+        text: "practicePage.exercises.addWithoutConversion",
+        url: "/practice/addition/add-without-conversion",
       },
       {
-        level: 10,
+        subject: "Addition",
         name: "add-with-conversion",
-        text: "Addition With Conversion",
-        url: "/test/10/add-with-conversion",
+        text: "practicePage.exercises.addWithConversion",
+        url: "/practice/addition/add-with-conversion",
       },
     ],
   },
   {
-    level: 13,
+    subject: "Order of Operations",
     tests: [
       {
-        level: 13,
+        subject: "Order of Operations",
+        name: "order-of-operations",
+        text: "practicePage.exercises.orderOfOperations",
+        url: "/practice/order-of-operations/order-of-operations",
+      },
+    ],
+  },
+  {
+    subject: "Fractions",
+    tests: [
+      {
+        subject: "Fractions",
         name: "fraction",
-        text: "Shaded Area - Fractions, Decimals & Percentages",
-        url: "/test/13/fraction",
+        text: "practicePage.exercises.fraction",
+        url: "/practice/fractions/fraction",
       },
     ],
   },
