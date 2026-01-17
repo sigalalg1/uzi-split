@@ -1,0 +1,40 @@
+{
+  "translation": {
+    "app": {
+      "title": "Math Place",
+      "login": "Login",
+      "test": "Test",
+      "practice": "Practice"
+    },
+    "expenseSplitter": {
+      "title": "Uzi Split",
+      "whoPaid": "Who paid? (Family name)",
+      "amount": "Amount",
+      "currency": {
+        "shekel": "₪ (Shekel)",
+        "dollar": "$ (Dollar)",
+        "euro": "€ (Euro)"
+      },
+      "whoParticipated": "Who participated:",
+      "addExpense": "Add Expense",
+      "clearSaved": "Clear saved",
+      "expenses": "Expenses",
+      "noExpenses": "No expenses yet. Add your first one above.",
+      "paid": "paid",
+      "sharedBy": "Shared by:",
+      "alerts": {
+        "enterPayer": "Please enter who paid (family name).",
+        "enterAmount": "Please enter a valid amount.",
+        "selectParticipant": "Please select at least one participating family.",
+        "confirmClear": "Clear all saved expenses?"
+      },
+      "families": {
+        "familyA": "Family A",
+        "familyB": "Family B",
+        "familyC": "Family C",
+        "familyD": "Family D",
+        "familyE": "Family E"
+      }
+    }
+  }
+}
