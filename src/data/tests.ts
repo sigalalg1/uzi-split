@@ -2,16 +2,19 @@ import { TestSubject } from "../types/test";
 
 export const testData: TestSubject[] = [
   {
-    subject: "Addition",
+    subject: "addition",
+    subjectKey: "practicePage.subjects.addition",
     tests: [
       {
-        subject: "Addition",
+        subject: "addition",
+        subjectKey: "practicePage.subjects.addition",
         name: "add-without-conversion",
         text: "practicePage.exercises.addWithoutConversion",
         url: "/practice/addition/add-without-conversion",
       },
       {
-        subject: "Addition",
+        subject: "addition",
+        subjectKey: "practicePage.subjects.addition",
         name: "add-with-conversion",
         text: "practicePage.exercises.addWithConversion",
         url: "/practice/addition/add-with-conversion",
@@ -19,10 +22,12 @@ export const testData: TestSubject[] = [
     ],
   },
   {
-    subject: "Order of Operations",
+    subject: "order-of-operations",
+    subjectKey: "practicePage.subjects.orderOfOperations",
     tests: [
       {
-        subject: "Order of Operations",
+        subject: "order-of-operations",
+        subjectKey: "practicePage.subjects.orderOfOperations",
         name: "order-of-operations",
         text: "practicePage.exercises.orderOfOperations",
         url: "/practice/order-of-operations/order-of-operations",
@@ -30,10 +35,12 @@ export const testData: TestSubject[] = [
     ],
   },
   {
-    subject: "Fractions",
+    subject: "fractions",
+    subjectKey: "practicePage.subjects.fractions",
     tests: [
       {
-        subject: "Fractions",
+        subject: "fractions",
+        subjectKey: "practicePage.subjects.fractions",
         name: "fraction",
         text: "practicePage.exercises.fraction",
         url: "/practice/fractions/fraction",

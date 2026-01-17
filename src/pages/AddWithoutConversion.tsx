@@ -201,7 +201,7 @@ export default function AddWithoutConversion() {
               {t("additionTest.title")}
             </Heading>
             <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
-              Addition
+              {t("practicePage.subjects.addition")}
             </Badge>
           </HStack>
 

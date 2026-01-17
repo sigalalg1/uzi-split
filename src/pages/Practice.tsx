@@ -8,7 +8,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(
-    new Set(["Addition", "Order of Operations", "Fractions"])
+    new Set(["addition", "order-of-operations", "fractions"])
   );
 
   const toggleSubject = (subject: string) => {
@@ -27,10 +27,6 @@ export default function Practice() {
     navigate(url);
   };
 
-  const handleBack = () => {
-    navigate("/");
-  };
-
   // Styles
   const container: React.CSSProperties = {
     minHeight: "calc(100vh - 70px)",
@@ -42,16 +38,6 @@ export default function Practice() {
     alignItems: "center",
     marginBottom: 30,
     gap: 20,
-  };
-
-  const backButton: React.CSSProperties = {
-    padding: "10px 20px",
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    background: "#fff",
-    cursor: "pointer",
-    fontSize: 16,
-    fontWeight: 500,
   };
 
   const title: React.CSSProperties = {
@@ -85,11 +71,6 @@ export default function Practice() {
     userSelect: "none",
   };
 
-  const levelHeaderHover: React.CSSProperties = {
-    ...levelHeader,
-    background: "#e5e7eb",
-  };
-
   const testList: React.CSSProperties = {
     padding: "10px 0",
     background: "#fff",
@@ -102,11 +83,6 @@ export default function Practice() {
     display: "flex",
     alignItems: "center",
     gap: 10,
-  };
-
-  const testItemHover: React.CSSProperties = {
-    ...testItem,
-    background: "#f9fafb",
   };
 
   const testIcon: React.CSSProperties = {
@@ -148,7 +124,7 @@ export default function Practice() {
                   (e.currentTarget.style.background = "#f3f4f6")
                 }
               >
-                <span>{subjectData.subject}</span>
+                <span>{t(subjectData.subjectKey)}</span>
                 <span
                   style={{
                     ...arrow,
