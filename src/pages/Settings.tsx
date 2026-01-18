@@ -64,20 +64,21 @@ export default function Settings() {
   };
 
   return (
-    <Container maxW="container.md" py={6}>
-      <VStack spacing={6} align="stretch">
+    <Container maxW="container.md" py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch">
         {/* Header */}
-        <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-          <HStack spacing={4}>
+        <Flex justify="space-between" align="center" flexWrap="wrap" gap={{ base: 2, md: 4 }}>
+          <HStack spacing={{ base: 2, md: 4 }}>
             <Button
               leftIcon={<ArrowBackIcon />}
               onClick={() => navigate('/profile')}
               variant="ghost"
               colorScheme="purple"
+              size={{ base: "sm", md: "md" }}
             >
               {t('settings.back')}
             </Button>
-            <Heading size="lg" color="purple.600">
+            <Heading size={{ base: "md", md: "lg" }} color="purple.600">
               {t('settings.title')}
             </Heading>
           </HStack>
@@ -86,23 +87,23 @@ export default function Settings() {
         {/* Settings Sections */}
         <Box
           bg="white"
-          p={6}
+          p={{ base: 4, md: 6 }}
           borderRadius="lg"
           shadow="md"
           borderWidth={1}
           borderColor="gray.200"
         >
-          <VStack spacing={6} align="stretch">
+          <VStack spacing={{ base: 4, md: 6 }} align="stretch">
             {/* Feedback Timing Setting */}
             <Box>
-              <HStack spacing={2} mb={3}>
-                <Heading size="md" color="gray.700">
+              <HStack spacing={2} mb={3} flexWrap="wrap">
+                <Heading size={{ base: "sm", md: "md" }} color="gray.700">
                   {t('settings.feedbackTiming')}
                 </Heading>
-                <Badge colorScheme="purple">{t('settings.practiceMode')}</Badge>
+                <Badge colorScheme="purple" fontSize={{ base: "xs", md: "sm" }}>{t('settings.practiceMode')}</Badge>
               </HStack>
-              
-              <Text color="gray.600" mb={4} fontSize="sm">
+
+              <Text color="gray.600" mb={4} fontSize={{ base: "xs", md: "sm" }}>
                 {t('settings.feedbackTimingDescription')}
               </Text>
 
@@ -112,7 +113,7 @@ export default function Settings() {
               >
                 <Stack spacing={4}>
                   <Box
-                    p={4}
+                    p={{ base: 3, md: 4 }}
                     borderRadius="md"
                     borderWidth={2}
                     borderColor={
@@ -128,7 +129,7 @@ export default function Settings() {
                       <VStack align="start" spacing={1} flex={1}>
                         <HStack>
                           <Radio value="afterEach" colorScheme="purple">
-                            <Text fontWeight="bold" fontSize="md">
+                            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
                               {t('settings.afterEach')}
                             </Text>
                           </Radio>
@@ -136,7 +137,7 @@ export default function Settings() {
                             <CheckIcon color="purple.500" boxSize={4} />
                           )}
                         </HStack>
-                        <Text fontSize="sm" color="gray.600" pl={6}>
+                        <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600" pl={6}>
                           {t('settings.afterEachDescription')}
                         </Text>
                       </VStack>
@@ -144,7 +145,7 @@ export default function Settings() {
                   </Box>
 
                   <Box
-                    p={4}
+                    p={{ base: 3, md: 4 }}
                     borderRadius="md"
                     borderWidth={2}
                     borderColor={
@@ -160,7 +161,7 @@ export default function Settings() {
                       <VStack align="start" spacing={1} flex={1}>
                         <HStack>
                           <Radio value="atEnd" colorScheme="purple">
-                            <Text fontWeight="bold" fontSize="md">
+                            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
                               {t('settings.atEnd')}
                             </Text>
                           </Radio>
@@ -168,7 +169,7 @@ export default function Settings() {
                             <CheckIcon color="purple.500" boxSize={4} />
                           )}
                         </HStack>
-                        <Text fontSize="sm" color="gray.600" pl={6}>
+                        <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600" pl={6}>
                           {t('settings.atEndDescription')}
                         </Text>
                       </VStack>
@@ -188,7 +189,7 @@ export default function Settings() {
                 </Heading>
                 <Badge colorScheme="green">{getDelayLabel(settings.feedbackDelay)}</Badge>
               </HStack>
-              
+
               <Text color="gray.600" mb={6} fontSize="sm">
                 {t('settings.feedbackDelayDescription')}
               </Text>
@@ -260,12 +261,14 @@ export default function Settings() {
         </Box>
 
         {/* Action Buttons */}
-        <HStack spacing={4}>
+        <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap">
           <Button
             onClick={handleReset}
             colorScheme="gray"
             variant="outline"
             flex={1}
+            minW={{ base: "140px", md: "auto" }}
+            size={{ base: "sm", md: "md" }}
           >
             {t('settings.resetDefaults')}
           </Button>
@@ -273,6 +276,8 @@ export default function Settings() {
             onClick={() => navigate('/practice')}
             colorScheme="purple"
             flex={1}
+            minW={{ base: "140px", md: "auto" }}
+            size={{ base: "sm", md: "md" }}
           >
             {t('settings.startPracticing')}
           </Button>
