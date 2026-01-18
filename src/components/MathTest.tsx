@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/UserContext";
 import * as userService from "../services/userService";
@@ -21,7 +21,15 @@ import { motion } from "framer-motion";
 import { TestDefinition } from "../config/types";
 import * as generators from "../generators/mathGenerators";
 import { validators } from "../generators/validators";
-import { CompletedExercise, Exercise, NumberExercise } from "../config/types";
+import {
+  CompletedExercise,
+  Exercise,
+  NumberExercise,
+  OrderOfOperationsExercise,
+  CompareNumbersExercise,
+  SequenceExercise,
+  PlaceValueExercise,
+} from "../config/types";
 
 const MotionBox = motion(Box);
 
@@ -34,7 +42,6 @@ export default function MathTest({ testConfig }: MathTestProps) {
   const toast = useToast();
   const { t } = useTranslation();
   const { currentUser, isAuthenticated } = useUser();
-  const params = useParams();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -101,7 +108,19 @@ export default function MathTest({ testConfig }: MathTestProps) {
 
   // Get question key for tracking duplicates
   const getQuestionKey = (exercise: Exercise): string => {
-    if ("num1" in exercise && "num2" in exercise) {
+    if ("comparison" in exercise) {
+      const compareEx = exercise as CompareNumbersExercise;
+      return `compare:${compareEx.num1},${compareEx.num2},${compareEx.comparison}`;
+    }
+    if ("sequence" in exercise) {
+      const seqEx = exercise as SequenceExercise;
+      return `sequence:${seqEx.sequence.join(",")},${seqEx.missingIndex}`;
+    }
+    if ("place" in exercise) {
+      const placeEx = exercise as PlaceValueExercise;
+      return `placevalue:${placeEx.number},${placeEx.place}`;
+    }
+    if ("num1" in exercise && "num2" in exercise && !("comparison" in exercise)) {
       return `${exercise.num1}${testConfig.config.operation}${exercise.num2}`;
     }
     if ("expression" in exercise) {
@@ -131,15 +150,6 @@ export default function MathTest({ testConfig }: MathTestProps) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleHistoryClick = (exercise: CompletedExercise) => {
-    // Extract only the Exercise properties (remove userAnswer, isCorrect, timestamp)
-    const { userAnswer: _ua, isCorrect: _ic, timestamp: _ts, ...exerciseData } = exercise;
-    setCurrentExercise(exerciseData as Exercise);
-    setUserAnswer("");
-    setShowFeedback(false);
-    setIsCorrect(null);
   };
 
   const handleSubmit = () => {
@@ -242,6 +252,298 @@ export default function MathTest({ testConfig }: MathTestProps) {
   const renderExercise = () => {
     if (!currentExercise) return null;
 
+    // Compare Numbers Exercise (check before general num1/num2)
+    if ("comparison" in currentExercise && "num1" in currentExercise && "num2" in currentExercise) {
+      const compareEx = currentExercise as CompareNumbersExercise;
+      const questionText = compareEx.comparison === "greater"
+        ? t("practicePage.naturalNumbers.whichNumberGreater")
+        : t("practicePage.naturalNumbers.whichNumberSmaller");
+
+      const handleNumberClick = (selectedNumber: number) => {
+        if (showFeedback) return; // Don't allow clicking during feedback
+        setUserAnswer(selectedNumber.toString());
+        // Trigger submit automatically after selection
+        setTimeout(() => {
+          const isAnswerCorrect = validateAnswer(selectedNumber.toString(), currentExercise.answer);
+          setIsCorrect(isAnswerCorrect);
+          setShowFeedback(true);
+          setTotalQuestions(totalQuestions + 1);
+
+          const completedExercise: CompletedExercise = {
+            ...currentExercise,
+            userAnswer: selectedNumber.toString(),
+            isCorrect: isAnswerCorrect,
+            timestamp: Date.now(),
+          };
+          setCompletedExercises([completedExercise, ...completedExercises]);
+
+          if (isAnswerCorrect) {
+            setScore(score + 1);
+            setStreak(streak + 1);
+
+            toast({
+              title: streak >= 2 ? `🎉 ${streak + 1} ${t("additionTest.inARow")}` : `✅ ${t("additionTest.correct")}`,
+              status: "success",
+              duration: 1500,
+              isClosable: true,
+              position: "top",
+            });
+          } else {
+            setStreak(0);
+
+            toast({
+              title: `❌ ${t("additionTest.notQuite")}`,
+              description: `${t("additionTest.answerIs")} ${currentExercise.answer}`,
+              status: "error",
+              duration: 2000,
+              isClosable: true,
+              position: "top",
+            });
+          }
+
+          // Check if game is complete
+          if (maxExercises && totalQuestions + 1 >= maxExercises) {
+            setIsTimerRunning(false);
+            setIsGameComplete(true);
+
+            if (currentUser) {
+              const finalScore = isAnswerCorrect ? score + 1 : score;
+              const finalTotal = totalQuestions + 1;
+              const testResult = {
+                testType: testConfig.config.testType,
+                score: finalScore,
+                totalQuestions: finalTotal,
+                difficulty: difficulty!,
+                timeElapsed: elapsedTime,
+                completedAt: Date.now(),
+                percentage: Math.round((finalScore / finalTotal) * 100),
+              };
+
+              try {
+                userService.saveTestResult(currentUser, testResult);
+              } catch (error) {
+                console.error("Error saving test result:", error);
+              }
+            }
+
+            setTimeout(() => {
+              setShowFeedback(false);
+              setIsCorrect(null);
+              setUserAnswer("");
+            }, 1500);
+          } else {
+            setTimeout(() => {
+              setShowFeedback(false);
+              setIsCorrect(null);
+              setUserAnswer("");
+              const nextExercise = generateExercise(difficulty!, usedQuestions);
+              const nextKey = getQuestionKey(nextExercise);
+              setUsedQuestions((prev) => {
+                const newSet = new Set(prev);
+                newSet.add(nextKey);
+                return newSet;
+              });
+              setCurrentExercise(nextExercise);
+            }, 1500);
+          }
+        }, 100);
+      };
+
+      return (
+        <VStack spacing={8}>
+          <Text fontSize="3xl" fontWeight="bold" color="teal.600">
+            {questionText}
+          </Text>
+          <HStack spacing={12} fontSize="8xl" fontWeight="bold">
+            <Button
+              onClick={() => handleNumberClick(compareEx.num1)}
+              disabled={showFeedback}
+              variant="ghost"
+              size="lg"
+              height="auto"
+              padding="2rem"
+              _hover={{
+                bg: showFeedback ? "transparent" : "blue.50",
+                transform: showFeedback ? "none" : "scale(1.1)",
+              }}
+              _active={{
+                bg: "blue.100",
+              }}
+              cursor={showFeedback ? "not-allowed" : "pointer"}
+              bg={userAnswer === compareEx.num1.toString() && showFeedback
+                ? isCorrect ? "green.100" : "red.100"
+                : "transparent"}
+            >
+              <MotionBox
+                animate={showFeedback ? {} : { scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.5, repeat: showFeedback ? 0 : Infinity, repeatDelay: 2 }}
+              >
+                <Text fontSize="9xl" color="blue.500">{compareEx.num1}</Text>
+              </MotionBox>
+            </Button>
+
+            <Text color="gray.400" fontSize="6xl">{t("practicePage.naturalNumbers.vs")}</Text>
+
+            <Button
+              onClick={() => handleNumberClick(compareEx.num2)}
+              disabled={showFeedback}
+              variant="ghost"
+              size="lg"
+              height="auto"
+              padding="2rem"
+              _hover={{
+                bg: showFeedback ? "transparent" : "purple.50",
+                transform: showFeedback ? "none" : "scale(1.1)",
+              }}
+              _active={{
+                bg: "purple.100",
+              }}
+              cursor={showFeedback ? "not-allowed" : "pointer"}
+              bg={userAnswer === compareEx.num2.toString() && showFeedback
+                ? isCorrect ? "green.100" : "red.100"
+                : "transparent"}
+            >
+              <MotionBox
+                animate={showFeedback ? {} : { scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.5, repeat: showFeedback ? 0 : Infinity, repeatDelay: 2, delay: 0.3 }}
+              >
+                <Text fontSize="9xl" color="purple.500">{compareEx.num2}</Text>
+              </MotionBox>
+            </Button>
+          </HStack>
+        </VStack>
+      );
+    }
+
+    // Sequence Exercise
+    if ("sequence" in currentExercise) {
+      const seqEx = currentExercise as SequenceExercise;
+      return (
+        <VStack spacing={8}>
+          <Text fontSize="3xl" fontWeight="bold" color="teal.600">
+            {t("practicePage.naturalNumbers.findMissingInSequence")}
+          </Text>
+          <HStack spacing={6} fontSize="6xl" fontWeight="bold">
+            {seqEx.sequence.map((num, idx) => (
+              <React.Fragment key={idx}>
+                {idx === seqEx.missingIndex ? (
+                  <Input
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={t("practicePage.naturalNumbers.yourAnswer")}
+                    fontSize="2xl"
+                    fontWeight="bold"
+                    textAlign="center"
+                    width="250px"
+                    height="auto"
+                    padding="0.5rem"
+                    autoFocus
+                    type="number"
+                    borderWidth={3}
+                    borderColor="teal.400"
+                    _focus={{
+                      borderColor: "teal.500",
+                      boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
+                    }}
+                    disabled={showFeedback}
+                  />
+                ) : (
+                  <Text color="blue.500">{num}</Text>
+                )}
+                {idx < seqEx.sequence.length - 1 && <Text color="gray.400">,</Text>}
+              </React.Fragment>
+            ))}
+          </HStack>
+        </VStack>
+      );
+    }
+
+    // Place Value Exercise
+    if ("place" in currentExercise) {
+      const placeEx = currentExercise as PlaceValueExercise;
+      const placeKey = placeEx.place;
+      const placeName = t(`practicePage.naturalNumbers.${placeKey}`);
+
+      return (
+        <VStack spacing={8}>
+          <Text fontSize="3xl" fontWeight="bold" color="teal.600">
+            {t("practicePage.naturalNumbers.whatIsDigit", { place: placeName })}
+          </Text>
+          <MotionBox
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+          >
+            <Text fontSize="9xl" fontWeight="bold" color="blue.500">
+              {placeEx.number}
+            </Text>
+          </MotionBox>
+          <HStack spacing={4} fontSize="4xl">
+            <Text color="gray.600" fontWeight="bold">
+              {placeName} =
+            </Text>
+            <Input
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={t("practicePage.naturalNumbers.yourAnswer")}
+              fontSize="6xl"
+              fontWeight="bold"
+              textAlign="center"
+              width="200px"
+              height="auto"
+              padding="0.5rem"
+              autoFocus
+              type="number"
+              borderWidth={3}
+              borderColor="teal.400"
+              _focus={{
+                borderColor: "teal.500",
+                boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
+              }}
+              disabled={showFeedback}
+            />
+          </HStack>
+        </VStack>
+      );
+    }
+
+    // Expression Exercise (Order of Operations)
+    if ("expression" in currentExercise) {
+      return (
+        <VStack spacing={6}>
+          <Text fontSize="6xl" fontWeight="bold" color="blue.500">
+            {currentExercise.expression}
+          </Text>
+          <HStack spacing={4} fontSize="6xl">
+            <Text color="gray.600">=</Text>
+            <Input
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="?"
+              fontSize="6xl"
+              fontWeight="bold"
+              textAlign="center"
+              width="300px"
+              height="auto"
+              padding="0.5rem"
+              autoFocus
+              type="number"
+              borderWidth={3}
+              borderColor="blue.400"
+              _focus={{
+                borderColor: "blue.500",
+                boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.3)",
+              }}
+              disabled={showFeedback}
+            />
+          </HStack>
+        </VStack>
+      );
+    }
+
+    // Standard Number Exercise (addition, subtraction, multiplication)
     if ("num1" in currentExercise && "num2" in currentExercise) {
       const numEx = currentExercise as NumberExercise;
       return (
@@ -290,10 +592,11 @@ export default function MathTest({ testConfig }: MathTestProps) {
     }
 
     if ("expression" in currentExercise) {
+      const orderEx = currentExercise as OrderOfOperationsExercise;
       return (
         <VStack spacing={6}>
           <Text fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }} fontWeight="bold" color="blue.500">
-            {currentExercise.expression}
+            {orderEx.expression}
           </Text>
           <HStack spacing={{ base: 2, md: 4 }} fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }}>
             <Text color="gray.600">=</Text>
@@ -322,6 +625,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
         </VStack>
       );
     }
+
 
     // Add more exercise type renderers as needed
     return (
@@ -355,17 +659,17 @@ export default function MathTest({ testConfig }: MathTestProps) {
       <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 6 }}>
         <VStack spacing={{ base: 6, md: 8 }} dir="ltr">
           <HStack justify="center" spacing={{ base: 2, md: 4 }} flexWrap="wrap">
-            <Heading 
-              textAlign="center" 
-              color={`${testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}.600`} 
+            <Heading
+              textAlign="center"
+              color={`${testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}.600`}
               size={{ base: "md", md: "lg" }}
             >
               {t(testConfig.i18nKey)}
             </Heading>
-            <Badge 
-              colorScheme={testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"} 
-              fontSize={{ base: "sm", md: "md" }} 
-              px={3} 
+            <Badge
+              colorScheme={testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}
+              fontSize={{ base: "sm", md: "md" }}
+              px={3}
               py={1}
             >
               {testConfig.config.testType}
@@ -552,17 +856,18 @@ export default function MathTest({ testConfig }: MathTestProps) {
                   >
                     <Flex justify="space-between" align="center" flexWrap="wrap">
                       <Text fontSize={{ base: "sm", md: "lg" }} fontWeight="bold">
-                        {exercise.isCorrect ? "✓" : "✗"} {t("additionTest.yourAnswer")}: {exercise.userAnswer}
+                        {exercise.isCorrect ? "✓" : "✗"} {t("practicePage.yourAnswer")}: {exercise.userAnswer}
                         {!exercise.isCorrect && ` (${t("additionTest.correct")}: ${(exercise as Exercise).answer})`}
                       </Text>
                     </Flex>
                   </Box>
                 ))}
               </VStack>
-            </Box>
-          )}
-        </VStack>
-      </Container>
+            </Box >
+          )
+          }
+        </VStack >
+      </Container >
     );
   }
 

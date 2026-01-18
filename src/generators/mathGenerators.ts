@@ -3,6 +3,9 @@ import {
   FractionExercise,
   OrderOfOperationsExercise,
   NumberLineExercise,
+  CompareNumbersExercise,
+  SequenceExercise,
+  PlaceValueExercise,
 } from "../config/types";
 
 // Helper function to check for duplicate questions
@@ -837,5 +840,212 @@ export function numberLine(
   }
 
   return { targetNumber, min, max, answer: targetNumber };
+}
+
+// Natural Numbers Generators
+
+// Compare Numbers Generator
+export function compareNumbers(
+  level: number,
+  existingQuestions: Set<string> = new Set()
+): CompareNumbersExercise {
+  let num1: number, num2: number;
+  const comparisons: Array<"greater" | "lesser" | "equal"> = ["greater", "lesser"];
+  
+  switch (level) {
+    case 1: // 1-20
+      num1 = Math.floor(Math.random() * 20) + 1;
+      num2 = Math.floor(Math.random() * 20) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 20) + 1;
+      break;
+    case 2: // 1-50
+      num1 = Math.floor(Math.random() * 50) + 1;
+      num2 = Math.floor(Math.random() * 50) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 50) + 1;
+      break;
+    case 3: // 1-100
+      num1 = Math.floor(Math.random() * 100) + 1;
+      num2 = Math.floor(Math.random() * 100) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 100) + 1;
+      break;
+    case 4: // 1-500
+      num1 = Math.floor(Math.random() * 500) + 1;
+      num2 = Math.floor(Math.random() * 500) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 500) + 1;
+      break;
+    case 5: // 1-1000
+      num1 = Math.floor(Math.random() * 1000) + 1;
+      num2 = Math.floor(Math.random() * 1000) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 1000) + 1;
+      break;
+    default:
+      num1 = Math.floor(Math.random() * 20) + 1;
+      num2 = Math.floor(Math.random() * 20) + 1;
+      while (num2 === num1) num2 = Math.floor(Math.random() * 20) + 1;
+  }
+
+  const comparison = comparisons[Math.floor(Math.random() * comparisons.length)];
+  const answer = comparison === "greater" ? Math.max(num1, num2) : Math.min(num1, num2);
+
+  const questionKey = `compare:${num1},${num2},${comparison}`;
+
+  if (isDuplicate(questionKey, existingQuestions)) {
+    let attempts = 0;
+    while (attempts < 10) {
+      const newExercise = compareNumbers(level, existingQuestions);
+      const newKey = `compare:${newExercise.num1},${newExercise.num2},${newExercise.comparison}`;
+      if (!isDuplicate(newKey, existingQuestions)) {
+        return newExercise;
+      }
+      attempts++;
+    }
+  }
+
+  return { num1, num2, comparison, answer };
+}
+
+// Complete Number Sequence Generator
+export function completeSequence(
+  level: number,
+  existingQuestions: Set<string> = new Set()
+): SequenceExercise {
+  let step: number, start: number, length: number;
+
+  switch (level) {
+    case 1: // Simple sequences (step 1-2), length 5
+      step = Math.floor(Math.random() * 2) + 1; // 1-2
+      start = Math.floor(Math.random() * 10) + 1;
+      length = 5;
+      break;
+    case 2: // Step 2-5, length 5
+      step = Math.floor(Math.random() * 4) + 2; // 2-5
+      start = Math.floor(Math.random() * 20) + 1;
+      length = 5;
+      break;
+    case 3: // Step 5-10, length 6
+      step = Math.floor(Math.random() * 6) + 5; // 5-10
+      start = Math.floor(Math.random() * 50) + 1;
+      length = 6;
+      break;
+    case 4: // Step 10-20, length 6
+      step = Math.floor(Math.random() * 11) + 10; // 10-20
+      start = Math.floor(Math.random() * 100) + 1;
+      length = 6;
+      break;
+    case 5: // Step 20-50, length 7
+      step = Math.floor(Math.random() * 31) + 20; // 20-50
+      start = Math.floor(Math.random() * 100) + 1;
+      length = 7;
+      break;
+    default:
+      step = 1;
+      start = Math.floor(Math.random() * 10) + 1;
+      length = 5;
+  }
+
+  const sequence: number[] = [];
+  for (let i = 0; i < length; i++) {
+    sequence.push(start + i * step);
+  }
+
+  // Pick a random index to be missing (not first or last for clarity)
+  const missingIndex = Math.floor(Math.random() * (length - 2)) + 1;
+  const answer = sequence[missingIndex];
+
+  const questionKey = `sequence:${sequence.join(",")},${missingIndex}`;
+
+  if (isDuplicate(questionKey, existingQuestions)) {
+    let attempts = 0;
+    while (attempts < 10) {
+      const newExercise = completeSequence(level, existingQuestions);
+      const newKey = `sequence:${newExercise.sequence.join(",")},${newExercise.missingIndex}`;
+      if (!isDuplicate(newKey, existingQuestions)) {
+        return newExercise;
+      }
+      attempts++;
+    }
+  }
+
+  return { sequence, missingIndex, answer };
+}
+
+// Find Missing Number (alias for completeSequence)
+export function findMissingNumber(
+  level: number,
+  existingQuestions: Set<string> = new Set()
+): SequenceExercise {
+  return completeSequence(level, existingQuestions);
+}
+
+// Place Value Generator
+export function placeValue(
+  level: number,
+  existingQuestions: Set<string> = new Set()
+): PlaceValueExercise {
+  let number: number;
+  let place: "hundreds" | "tens" | "units";
+  
+  switch (level) {
+    case 1: // Two-digit numbers, tens or units
+      number = Math.floor(Math.random() * 90) + 10; // 10-99
+      place = Math.random() < 0.5 ? "tens" : "units";
+      break;
+    case 2: // Three-digit numbers, any place
+      number = Math.floor(Math.random() * 900) + 100; // 100-999
+      const places2: Array<"hundreds" | "tens" | "units"> = ["hundreds", "tens", "units"];
+      place = places2[Math.floor(Math.random() * places2.length)];
+      break;
+    case 3: // Three-digit numbers with more variety
+      number = Math.floor(Math.random() * 900) + 100; // 100-999
+      const places3: Array<"hundreds" | "tens" | "units"> = ["hundreds", "tens", "units"];
+      place = places3[Math.floor(Math.random() * places3.length)];
+      break;
+    case 4: // Larger three-digit numbers
+      number = Math.floor(Math.random() * 900) + 100; // 100-999
+      const places4: Array<"hundreds" | "tens" | "units"> = ["hundreds", "tens", "units"];
+      place = places4[Math.floor(Math.random() * places4.length)];
+      break;
+    case 5: // Even larger numbers
+      number = Math.floor(Math.random() * 900) + 100; // 100-999
+      const places5: Array<"hundreds" | "tens" | "units"> = ["hundreds", "tens", "units"];
+      place = places5[Math.floor(Math.random() * places5.length)];
+      break;
+    default:
+      number = Math.floor(Math.random() * 90) + 10;
+      place = Math.random() < 0.5 ? "tens" : "units";
+  }
+
+  let answer: number;
+  if (place === "hundreds") {
+    answer = Math.floor(number / 100);
+  } else if (place === "tens") {
+    answer = Math.floor((number % 100) / 10);
+  } else {
+    answer = number % 10;
+  }
+
+  const questionKey = `placevalue:${number},${place}`;
+
+  if (isDuplicate(questionKey, existingQuestions)) {
+    let attempts = 0;
+    while (attempts < 10) {
+      const newExercise = placeValue(level, existingQuestions);
+      const newKey = `placevalue:${newExercise.number},${newExercise.place}`;
+      if (!isDuplicate(newKey, existingQuestions)) {
+        return newExercise;
+      }
+      attempts++;
+    }
+  }
+
+  return { number, place, answer };
+}
+
+// Locate Number on Number Line (similar to numberLine but with different presentation)
+export function locateNumberLine(
+  level: number,
+  existingQuestions: Set<string> = new Set()
+): NumberLineExercise {
+  return numberLine(level, existingQuestions);
 }
 

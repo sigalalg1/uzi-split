@@ -190,7 +190,7 @@ export const getUserStats = (username: string) => {
 // Clear user's test history
 export const clearUserHistory = (username: string): void => {
   const data = getData();
-  
+
   if (!data.users[username]) {
     throw new Error('User does not exist');
   }

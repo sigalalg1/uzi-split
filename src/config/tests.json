@@ -268,6 +268,93 @@
           }
         }
       }
+    ],
+    "natural-numbers": [
+      {
+        "id": "compare-numbers",
+        "i18nKey": "practicePage.exercises.compareNumbers",
+        "url": "/practice/natural-numbers/compare-numbers",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "natural-numbers",
+          "operation": "compare",
+          "generator": "compareNumbers",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "complete-sequence",
+        "i18nKey": "practicePage.exercises.completeSequence",
+        "url": "/practice/natural-numbers/complete-sequence",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "natural-numbers",
+          "operation": "sequence",
+          "generator": "completeSequence",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "find-missing-number",
+        "i18nKey": "practicePage.exercises.findMissingNumber",
+        "url": "/practice/natural-numbers/find-missing-number",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "natural-numbers",
+          "operation": "missing",
+          "generator": "findMissingNumber",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "place-value",
+        "i18nKey": "practicePage.exercises.placeValue",
+        "url": "/practice/natural-numbers/place-value",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "natural-numbers",
+          "operation": "place-value",
+          "generator": "placeValue",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "locate-number-line",
+        "i18nKey": "practicePage.exercises.locateNumberLine",
+        "url": "/practice/natural-numbers/locate-number-line",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "natural-numbers",
+          "operation": "locate",
+          "generator": "locateNumberLine",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
     ]
   }
 }

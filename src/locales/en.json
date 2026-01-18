@@ -4,7 +4,8 @@
       "title": "Mathemiko",
       "login": "Login",
       "test": "Test",
-      "practice": "Practice"
+      "practice": "Practice",
+      "testNotAvailable": "Test mode is not available yet"
     },
     "common": {
       "numerator": "Numerator",
@@ -33,6 +34,7 @@
         "multiplication": "Multiplication",
         "orderOfOperations": "Order of Operations",
         "fractions": "Fractions",
+        "naturalNumbers": "Natural Numbers",
         "numberLine": "Number Line"
       },
       "exercises": {
@@ -50,7 +52,23 @@
         "fractionAddition": "Fraction Addition",
         "leastCommonDenominator": "Least Common Denominator",
         "fraction": "Shaded Area - Fractions, Decimals & Percentages",
-        "numberLine": "Number Line"
+        "numberLine": "Number Line",
+        "compareNumbers": "Compare Numbers",
+        "completeSequence": "Complete Number Sequences",
+        "findMissingNumber": "Find Missing Number",
+        "placeValue": "Place Value (Hundreds/Tens/Units)",
+        "locateNumberLine": "Locate Number on Number Line"
+      },
+      "naturalNumbers": {
+        "whichNumberGreater": "Which number is GREATER?",
+        "whichNumberSmaller": "Which number is SMALLER?",
+        "findMissingInSequence": "Find the missing number in the sequence",
+        "whatIsDigit": "What is the {{place}} digit?",
+        "hundreds": "HUNDREDS",
+        "tens": "TENS",
+        "units": "UNITS",
+        "vs": "vs",
+        "yourAnswer": "Your answer"
       }
     },
     "additionTest": {

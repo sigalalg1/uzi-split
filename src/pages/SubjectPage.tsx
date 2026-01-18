@@ -130,10 +130,12 @@ export default function SubjectPage() {
                     {test.config.difficultyLevels.max - test.config.difficultyLevels.min + 1} {t("practicePage.difficultyLevels")}
                   </Badge>
 
-                  {/* Operation Badge */}
-                  <Text fontSize={{ base: "3xl", md: "4xl" }} color={`${colorScheme}.500`}>
-                    {test.config.operation}
-                  </Text>
+                  {/* Operation Badge - Only show for mathematical symbols */}
+                  {["+", "-", "×", "÷", "=", "mixed", "lcd", "position"].includes(test.config.operation) && (
+                    <Text fontSize={{ base: "3xl", md: "4xl" }} color={`${colorScheme}.500`}>
+                      {test.config.operation}
+                    </Text>
+                  )}
                 </VStack>
 
                 {/* Practice Button */}
