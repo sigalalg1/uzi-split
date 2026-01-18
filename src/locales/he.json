@@ -11,7 +11,8 @@
       "numerator": "מונה",
       "denominator": "מכנה",
       "decimal": "עשרוני",
-      "fraction": "שבר"
+      "fraction": "שבר",
+      "lcd": "מ.מ.ק"
     },
     "practicePage": {
       "title": "תרגול",
@@ -22,6 +23,7 @@
       "difficultyLevels": "רמות קושי",
       "selectQuestions": "כמה שאלות?",
       "selectDifficulty": "בחר רמת קושי:",
+      "start": "התחל",
       "viewTests": "צפה בתרגילים",
       "chooseExercise": "בחר תרגיל להתחיל לתרגל",
       "subjectNotFound": "הנושא לא נמצא",
@@ -607,6 +609,11 @@
       "feedbackDelayDescription": "כמה זמן להציג את התשובה לפני המעבר לשאלה הבאה",
       "faster": "מהיר יותר",
       "slower": "איטי יותר",
+      "defaultTestCount": "מספר שאלות ברירת מחדל",
+      "defaultTestCountDescription": ".בחירה מוקדמת של כמה שאלות לענות עליהן. אפשר עדיין לשנות לפני ההתחלה. בחר 'ידני' אם לא רוצה ברירת מחדל",
+      "defaultDifficulty": "רמת קושי ברירת מחדל",
+      "defaultDifficultyDescription": ".בחירה מוקדמת של רמת הקושי למבחנים. אפשר עדיין לשנות לפני ההתחלה. בחר 'ידני' אם לא רוצה ברירת מחדל",
+      "manual": "ידני",
       "tip": "טיפ",
       "tipDescription": "בחר 'אחרי כל שאלה' למצב למידה, או 'בסוף המבחן' למצב מבחן",
       "resetDefaults": "אפס לברירות מחדל",
