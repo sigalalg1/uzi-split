@@ -167,7 +167,6 @@ export const getUserStats = (username: string) => {
 
   const totalTests = results.length;
   const totalScore = results.reduce((sum, r) => sum + r.score, 0);
-  const totalQuestions = results.reduce((sum, r) => sum + r.totalQuestions, 0);
   const totalTime = results.reduce((sum, r) => sum + r.timeElapsed, 0);
   const averagePercentage = results.reduce((sum, r) => sum + r.percentage, 0) / totalTests;
 

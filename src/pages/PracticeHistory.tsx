@@ -22,13 +22,7 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
-  Icon,
   useColorModeValue,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   SimpleGrid,
   Progress,
   useToast,
@@ -54,18 +48,22 @@ export default function PracticeHistory() {
 
   const [filterType, setFilterType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date-desc');
-  const [refreshKey, setRefreshKey] = useState(0);
 
   // Get user data (safe even if currentUser is null)
-  const allResults = currentUser ? userService.getUserTestResults(currentUser) : [];
-  const stats = currentUser ? userService.getUserStats(currentUser) : {
-    totalTests: 0,
-    averageScore: 0,
-    averagePercentage: 0,
-    totalTime: 0,
-    bestScore: null,
-    recentTests: [],
-  };
+  const allResults = useMemo(() =>
+    currentUser ? userService.getUserTestResults(currentUser) : []
+    , [currentUser]);
+
+  const stats = useMemo(() =>
+    currentUser ? userService.getUserStats(currentUser) : {
+      totalTests: 0,
+      averageScore: 0,
+      averagePercentage: 0,
+      totalTime: 0,
+      bestScore: null,
+      recentTests: [],
+    }
+    , [currentUser]);
 
   // Filter results by test type
   const filteredResults = useMemo(() => {
@@ -174,7 +172,6 @@ export default function PracticeHistory() {
     if (currentUser) {
       try {
         userService.clearUserHistory(currentUser);
-        setRefreshKey(prev => prev + 1); // Force refresh
         toast({
           title: t('history.historyCleared'),
           description: t('history.historyClearedDescription'),
