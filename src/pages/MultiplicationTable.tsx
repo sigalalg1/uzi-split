@@ -5,15 +5,15 @@ import {
   Box,
   Button,
   Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Input,
-  Progress,
-  useToast,
-  Badge,
   Flex,
+  Heading,
+  HStack,
+  VStack,
+  Text,
+  Badge,
+  Progress,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
@@ -31,10 +31,10 @@ type CompletedExercise = Exercise & {
   timestamp: number;
 };
 
-export default function AddWithoutConversion() {
+export default function MultiplicationTable() {
   const navigate = useNavigate();
-  const toast = useToast();
   const { t } = useTranslation();
+  const toast = useToast();
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -53,51 +53,45 @@ export default function AddWithoutConversion() {
   const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
   const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
-    // Generate based on difficulty level (1-5)
-    let num1, num2, maxNum;
+    let num1: number, num2: number;
 
     switch (level) {
-      case 1: // Very easy: 1-4, sum < 6
-        num1 = Math.floor(Math.random() * 4) + 1;
-        maxNum = Math.min(5 - num1, 4);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 2: // Easy: 1-5, sum < 8
+      case 1: // Very easy: 1-5 tables
         num1 = Math.floor(Math.random() * 5) + 1;
-        maxNum = Math.min(7 - num1, 5);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
         break;
-      case 3: // Medium: 1-6, sum < 10
-        num1 = Math.floor(Math.random() * 6) + 1;
-        maxNum = Math.min(9 - num1, 6);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 4: // Hard: 1-8, sum < 12
-        num1 = Math.floor(Math.random() * 8) + 1;
-        maxNum = Math.min(11 - num1, 8);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
-        break;
-      case 5: // Very hard: 1-10, sum < 15
+      case 2: // Easy: 1-10 tables
         num1 = Math.floor(Math.random() * 10) + 1;
-        maxNum = Math.min(14 - num1, 10);
-        num2 = Math.floor(Math.random() * maxNum) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        break;
+      case 3: // Medium: 1-12 tables
+        num1 = Math.floor(Math.random() * 12) + 1;
+        num2 = Math.floor(Math.random() * 12) + 1;
+        break;
+      case 4: // Hard: 1-15 tables
+        num1 = Math.floor(Math.random() * 15) + 1;
+        num2 = Math.floor(Math.random() * 15) + 1;
+        break;
+      case 5: // Very hard: 1-20 tables
+        num1 = Math.floor(Math.random() * 20) + 1;
+        num2 = Math.floor(Math.random() * 20) + 1;
         break;
       default:
-        num1 = Math.floor(Math.random() * 5) + 1;
-        num2 = Math.floor(Math.random() * (9 - num1)) + 1;
+        num1 = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
     }
 
     // Check for duplicates and regenerate if needed
-    const questionKey = `${num1}+${num2}`;
-    const questionKeyReverse = `${num2}+${num1}`;
+    const questionKey = `${num1}×${num2}`;
+    const questionKeyReverse = `${num2}×${num1}`;
     
     if (existingQuestions.has(questionKey) || existingQuestions.has(questionKeyReverse)) {
       // Try up to 10 times to find a unique question
       let attempts = 0;
       while (attempts < 10) {
         const newExercise = generateExercise(level, existingQuestions);
-        const newKey = `${newExercise.num1}+${newExercise.num2}`;
-        const newKeyReverse = `${newExercise.num2}+${newExercise.num1}`;
+        const newKey = `${newExercise.num1}×${newExercise.num2}`;
+        const newKeyReverse = `${newExercise.num2}×${newExercise.num1}`;
         if (!existingQuestions.has(newKey) && !existingQuestions.has(newKeyReverse)) {
           return newExercise;
         }
@@ -108,7 +102,7 @@ export default function AddWithoutConversion() {
     return {
       num1,
       num2,
-      answer: num1 + num2,
+      answer: num1 * num2,
     };
   };
 
@@ -118,7 +112,7 @@ export default function AddWithoutConversion() {
     const newUsedQuestions = new Set<string>();
     setUsedQuestions(newUsedQuestions);
     const firstExercise = generateExercise(level, newUsedQuestions);
-    newUsedQuestions.add(`${firstExercise.num1}+${firstExercise.num2}`);
+    newUsedQuestions.add(`${firstExercise.num1}×${firstExercise.num2}`);
     setUsedQuestions(newUsedQuestions);
     setCurrentExercise(firstExercise);
     setIsTimerRunning(true);
@@ -130,7 +124,6 @@ export default function AddWithoutConversion() {
     setIsGameComplete(false);
   };
 
-  // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerRunning) {
@@ -148,14 +141,11 @@ export default function AddWithoutConversion() {
   };
 
   const handleHistoryClick = (exercise: CompletedExercise) => {
-    // Load the exercise from history
     setCurrentExercise({
       num1: exercise.num1,
       num2: exercise.num2,
       answer: exercise.answer,
     });
-    
-    // Clear inputs for retry
     setUserAnswer("");
     setShowFeedback(false);
     setIsCorrect(null);
@@ -170,7 +160,6 @@ export default function AddWithoutConversion() {
     setShowFeedback(true);
     setTotalQuestions(totalQuestions + 1);
 
-    // Add to completed exercises
     const completedExercise: CompletedExercise = {
       ...currentExercise,
       userAnswer: parsedAnswer,
@@ -184,7 +173,7 @@ export default function AddWithoutConversion() {
       setStreak(streak + 1);
 
       toast({
-        title: streak >= 2 ? `🎉 ${streak + 1} ${t("additionTest.inARow")}` : `✅ ${t("additionTest.correct")}`,
+        title: streak >= 2 ? `🎉 ${streak + 1} ${t("multiplicationTable.inARow")}` : `✅ ${t("multiplicationTable.correct")}`,
         status: "success",
         duration: 1500,
         isClosable: true,
@@ -194,8 +183,8 @@ export default function AddWithoutConversion() {
       setStreak(0);
 
       toast({
-        title: `❌ ${t("additionTest.notQuite")}`,
-        description: `${t("additionTest.answerIs")} ${currentExercise.answer}`,
+        title: `❌ ${t("multiplicationTable.notQuite")}`,
+        description: `${t("multiplicationTable.answerIs")} ${currentExercise.answer}`,
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -203,17 +192,13 @@ export default function AddWithoutConversion() {
       });
     }
 
-    // Check if game is complete
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
       setTimeout(() => {
         setShowFeedback(false);
-        setIsCorrect(null);
-        setUserAnswer("");
-      }, 1500);
+      }, 2000);
     } else {
-      // Move to next question after a delay
       setTimeout(() => {
         setShowFeedback(false);
         setIsCorrect(null);
@@ -221,7 +206,7 @@ export default function AddWithoutConversion() {
         const nextExercise = generateExercise(difficulty!, usedQuestions);
         setUsedQuestions(prev => {
           const newSet = new Set(prev);
-          newSet.add(`${nextExercise.num1}+${nextExercise.num2}`);
+          newSet.add(`${nextExercise.num1}×${nextExercise.num2}`);
           return newSet;
         });
         setCurrentExercise(nextExercise);
@@ -241,11 +226,11 @@ export default function AddWithoutConversion() {
       <Container maxW="container.md" py={8}>
         <VStack spacing={8}>
           <HStack justify="center" spacing={4}>
-            <Heading textAlign="center" color="blue.600" size="lg">
-              {t("additionTest.title")}
+            <Heading textAlign="center" color="red.600" size="lg">
+              {t("multiplicationTable.title")}
             </Heading>
-            <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
-              {t("practicePage.subjects.addition")}
+            <Badge colorScheme="red" fontSize="md" px={3} py={1}>
+              {t("practicePage.subjects.multiplication")}
             </Badge>
           </HStack>
 
@@ -261,7 +246,7 @@ export default function AddWithoutConversion() {
                   <Button
                     key={count}
                     onClick={() => setTempCount(count)}
-                    colorScheme="blue"
+                    colorScheme="red"
                     size="lg"
                     fontSize="2xl"
                     width="100px"
@@ -288,13 +273,13 @@ export default function AddWithoutConversion() {
                   <Button
                     key={level}
                     onClick={() => startGame(tempCount, level)}
-                    colorScheme="blue"
+                    colorScheme="red"
                     variant="outline"
                     size="lg"
                     fontSize="3xl"
                     width="100px"
                     height="100px"
-                    _hover={{ transform: "scale(1.05)", bg: "blue.50" }}
+                    _hover={{ transform: "scale(1.05)", bg: "red.50" }}
                     transition="all 0.2s"
                   >
                     {level}
@@ -307,7 +292,7 @@ export default function AddWithoutConversion() {
                 colorScheme="gray"
                 variant="ghost"
               >
-                ← {t("additionTest.back")}
+                ← {t("multiplicationTable.back")}
               </Button>
             </>
           )}
@@ -320,7 +305,7 @@ export default function AddWithoutConversion() {
   if (isGameComplete) {
     const percentage = Math.round((score / totalQuestions) * 100);
     return (
-      <Container maxW="container.md" py={8}>
+      <Container maxW="container.lg" py={8}>
         <VStack spacing={8}>
           <MotionBox
             initial={{ scale: 0 }}
@@ -328,7 +313,13 @@ export default function AddWithoutConversion() {
             transition={{ type: "spring", duration: 0.5 }}
           >
             <Heading size="2xl" textAlign="center">
-              {percentage === 100 ? t("additionTest.perfectScore") : percentage >= 80 ? t("additionTest.greatJob") : percentage >= 60 ? t("additionTest.wellDone") : t("additionTest.keepPracticing")}
+              {percentage === 100
+                ? t("multiplicationTable.perfectScore")
+                : percentage >= 80
+                  ? t("multiplicationTable.greatJob")
+                  : percentage >= 60
+                    ? t("multiplicationTable.wellDone")
+                    : t("multiplicationTable.keepPracticing")}
             </Heading>
           </MotionBox>
 
@@ -338,32 +329,46 @@ export default function AddWithoutConversion() {
             borderRadius="2xl"
             shadow="2xl"
             borderWidth={3}
-            borderColor="blue.400"
+            borderColor="red.400"
             width="100%"
           >
             <VStack spacing={6}>
               <Heading size="lg" color="gray.700">
-                {t("additionTest.testComplete")}
+                {t("multiplicationTable.testComplete")}
               </Heading>
 
-              <HStack spacing={8} fontSize="3xl" fontWeight="bold">
+              <HStack spacing={12} fontSize="xl" flexWrap="wrap" justify="center">
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.score")}</Text>
-                  <Text color="blue.600">{score}/{totalQuestions}</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("multiplicationTable.yourScore")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
+                    {score}/{totalQuestions}
+                  </Text>
                 </VStack>
+
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.accuracy")}</Text>
-                  <Text color="green.600">{percentage}%</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("multiplicationTable.accuracy")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
+                    {percentage}%
+                  </Text>
                 </VStack>
+
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">{t("additionTest.time")}</Text>
-                  <Text color="purple.600">{formatTime(elapsedTime)}</Text>
+                  <Text fontWeight="bold" color="gray.600">
+                    {t("multiplicationTable.time")}
+                  </Text>
+                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
+                    {formatTime(elapsedTime)}
+                  </Text>
                 </VStack>
               </HStack>
 
               <Progress
                 value={percentage}
-                colorScheme={percentage >= 80 ? "green" : percentage >= 60 ? "yellow" : "red"}
+                colorScheme="red"
                 size="lg"
                 borderRadius="full"
                 width="100%"
@@ -373,17 +378,17 @@ export default function AddWithoutConversion() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { 
-                setMaxExercises(null); 
+              onClick={() => {
+                setMaxExercises(null);
                 setDifficulty(null);
                 setUserAnswer("");
                 setTempCount(null);
               }}
-              colorScheme="blue"
+              colorScheme="red"
               size="lg"
               flex={1}
             >
-              {t("additionTest.startNew")}
+              {t("multiplicationTable.startNew")}
             </Button>
             <Button
               onClick={() => navigate("/practice")}
@@ -392,51 +397,9 @@ export default function AddWithoutConversion() {
               size="lg"
               flex={1}
             >
-              {t("additionTest.backToTests")}
+              {t("multiplicationTable.backToTests")}
             </Button>
           </HStack>
-
-          {/* Show completed exercises */}
-          <Box width="100%">
-            <Heading size="md" mb={4} color="gray.600">
-              Review Your Answers
-            </Heading>
-            <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
-              {completedExercises.map((exercise) => (
-                <Box
-                  key={exercise.timestamp}
-                  p={4}
-                  borderRadius="lg"
-                  bg={exercise.isCorrect ? "green.50" : "red.50"}
-                  borderWidth={2}
-                  borderColor={exercise.isCorrect ? "green.200" : "red.200"}
-                >
-                  <Flex justify="space-between" align="center">
-                    <HStack spacing={4} fontSize="2xl" fontWeight="bold">
-                      <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
-                        {exercise.isCorrect ? "✓" : "✗"}
-                      </Text>
-                      <Text color="blue.500">{exercise.num1}</Text>
-                      <Text color="gray.500">+</Text>
-                      <Text color="purple.500">{exercise.num2}</Text>
-                      <Text color="gray.500">=</Text>
-                      <Text
-                        color={exercise.isCorrect ? "green.600" : "red.600"}
-                        textDecoration={exercise.isCorrect ? "none" : "line-through"}
-                      >
-                        {exercise.userAnswer}
-                      </Text>
-                      {!exercise.isCorrect && (
-                        <Text color="green.600" fontSize="lg">
-                          (correct: {exercise.answer})
-                        </Text>
-                      )}
-                    </HStack>
-                  </Flex>
-                </Box>
-              ))}
-            </VStack>
-          </Box>
         </VStack>
       </Container>
     );
@@ -454,16 +417,16 @@ export default function AddWithoutConversion() {
               ⏱️ {formatTime(elapsedTime)}
             </Badge>
             <Badge colorScheme="purple" fontSize="lg" px={4} py={2} borderRadius="full">
-              🔥 {t("additionTest.streak")}: {streak}
+              🔥 {t("multiplicationTable.streak")}: {streak}
             </Badge>
           </HStack>
         </Flex>
 
         <HStack justify="center" spacing={4}>
-          <Heading textAlign="center" color="blue.600" size="lg">
-            {t("additionTest.title")}
+          <Heading textAlign="center" color="red.600" size="lg">
+            {t("multiplicationTable.title")}
           </Heading>
-          <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
+          <Badge colorScheme="red" fontSize="md" px={3} py={1}>
             {t("practicePage.difficultyLevel")} {difficulty}
           </Badge>
         </HStack>
@@ -472,15 +435,16 @@ export default function AddWithoutConversion() {
         <Box>
           <Flex justify="space-between" mb={2}>
             <Text fontWeight="bold">
-              {t("additionTest.progress")}: {totalQuestions}/{maxExercises}
+              {t("multiplicationTable.progress")}: {totalQuestions}/{maxExercises}
             </Text>
             <Text fontWeight="bold">
-              {t("additionTest.score")}: {score}/{totalQuestions} ({totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
+              {t("multiplicationTable.score")}: {score}/{totalQuestions} (
+              {totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
             </Text>
           </Flex>
           <Progress
             value={maxExercises ? (totalQuestions / maxExercises) * 100 : 0}
-            colorScheme="blue"
+            colorScheme="red"
             size="lg"
             borderRadius="full"
           />
@@ -490,7 +454,7 @@ export default function AddWithoutConversion() {
         <MotionBox
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          key={`${currentExercise.num1}-${currentExercise.num2}`}
+          key={`${currentExercise.num1}-${currentExercise.num2}-${totalQuestions}`}
           transition={{ duration: 0.3 }}
         >
           <Box
@@ -507,45 +471,43 @@ export default function AddWithoutConversion() {
                 ? isCorrect
                   ? "green.400"
                   : "red.400"
-                : "blue.400"
+                : "red.400"
             }
             borderRadius="2xl"
             p={12}
             shadow="2xl"
             transition="all 0.3s"
           >
-            <VStack spacing={8}>
-              {/* Numbers with animation */}
-              <HStack spacing={8} fontSize="8xl" fontWeight="bold">
+            <VStack spacing={6}>
+              {/* Multiplication Problem */}
+              <HStack spacing={6} fontSize="6xl" fontWeight="bold" flexWrap="wrap" justify="center">
                 <MotionBox
                   animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 1],
                   }}
                   transition={{
-                    duration: 0.5,
+                    duration: 1,
                     repeat: Infinity,
-                    repeatDelay: 3,
+                    repeatDelay: 2,
                   }}
                 >
-                  <Text color="blue.500">{currentExercise.num1}</Text>
+                  <Text color="red.500">{currentExercise.num1}</Text>
                 </MotionBox>
 
-                <Text color="gray.600">+</Text>
+                <Text color="gray.600">×</Text>
 
                 <MotionBox
                   animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, -5, 5, 0],
+                    scale: [1, 1.05, 1],
                   }}
                   transition={{
-                    duration: 0.5,
+                    duration: 1,
                     repeat: Infinity,
-                    repeatDelay: 3,
-                    delay: 0.2,
+                    repeatDelay: 2,
+                    delay: 0.5,
                   }}
                 >
-                  <Text color="purple.500">{currentExercise.num2}</Text>
+                  <Text color="red.500">{currentExercise.num2}</Text>
                 </MotionBox>
 
                 <Text color="gray.600">=</Text>
@@ -566,10 +528,10 @@ export default function AddWithoutConversion() {
                   autoFocus
                   type="number"
                   borderWidth={3}
-                  borderColor="blue.400"
+                  borderColor="red.400"
                   _focus={{
-                    borderColor: "blue.500",
-                    boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.3)",
+                    borderColor: "red.500",
+                    boxShadow: "0 0 0 3px rgba(245, 101, 101, 0.3)",
                   }}
                   disabled={showFeedback}
                 />
@@ -578,16 +540,16 @@ export default function AddWithoutConversion() {
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                colorScheme="blue"
+                colorScheme="red"
                 size="lg"
-                fontSize="2xl"
-                px={12}
-                py={8}
+                fontSize="xl"
+                px={8}
+                py={6}
                 isDisabled={userAnswer === "" || showFeedback}
                 _hover={{ transform: "scale(1.05)" }}
                 transition="all 0.2s"
               >
-                {t("additionTest.checkAnswer")}
+                {t("multiplicationTable.checkAnswer")}
               </Button>
             </VStack>
           </Box>
@@ -605,10 +567,10 @@ export default function AddWithoutConversion() {
         >
           <Text textAlign="center" fontSize="xl" color="gray.500">
             {streak >= 5
-              ? t("additionTest.onFire")
+              ? t("multiplicationTable.onFire")
               : streak >= 3
-                ? t("additionTest.amazing")
-                : t("additionTest.typeAnswer")}
+                ? t("multiplicationTable.amazing")
+                : t("multiplicationTable.typeAnswer")}
           </Text>
         </MotionBox>
 
@@ -616,10 +578,10 @@ export default function AddWithoutConversion() {
         {completedExercises.length > 0 && (
           <Box mt={8}>
             <Heading size="md" mb={4} color="gray.600">
-              {t("additionTest.completedExercises")}
+              {t("multiplicationTable.completedExercises")}
             </Heading>
-            <VStack spacing={2} align="stretch">
-              {completedExercises.map((exercise, index) => (
+            <VStack spacing={2} align="stretch" maxH="300px" overflowY="auto">
+              {completedExercises.map((exercise) => (
                 <MotionBox
                   key={exercise.timestamp}
                   initial={{ opacity: 0, x: -20 }}
@@ -636,16 +598,16 @@ export default function AddWithoutConversion() {
                     _hover={{ opacity: 1, transform: "scale(1.02)", cursor: "pointer" }}
                     transition="all 0.2s"
                     onClick={() => handleHistoryClick(exercise)}
-                    title={t("additionTest.clickToRetry")}
+                    title={t("multiplicationTable.clickToRetry")}
                   >
-                    <Flex justify="space-between" align="center">
-                      <HStack spacing={4} fontSize="2xl" fontWeight="bold">
+                    <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                      <HStack spacing={3} fontSize="2xl" fontWeight="bold" flexWrap="wrap">
                         <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                           {exercise.isCorrect ? "✓" : "✗"}
                         </Text>
-                        <Text color="blue.500">{exercise.num1}</Text>
-                        <Text color="gray.500">+</Text>
-                        <Text color="purple.500">{exercise.num2}</Text>
+                        <Text color="red.500">{exercise.num1}</Text>
+                        <Text color="gray.500">×</Text>
+                        <Text color="red.500">{exercise.num2}</Text>
                         <Text color="gray.500">=</Text>
                         <Text
                           color={exercise.isCorrect ? "green.600" : "red.600"}

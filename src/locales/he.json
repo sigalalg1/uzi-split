@@ -6,6 +6,12 @@
       "test": "מבחן",
       "practice": "תרגול"
     },
+    "common": {
+      "numerator": "מונה",
+      "denominator": "מכנה",
+      "decimal": "עשרוני",
+      "fraction": "שבר"
+    },
     "practicePage": {
       "title": "תרגול",
       "level": "רמה",
@@ -14,13 +20,17 @@
       "selectDifficulty": "בחר רמת קושי:",
       "subjects": {
         "addition": "חיבור",
+        "multiplication": "כפל",
         "orderOfOperations": "סדר פעולות",
         "fractions": "שברים"
       },
       "exercises": {
         "addWithoutConversion": "חיבור ללא המרה",
         "addWithConversion": "חיבור עם המרה",
+        "multiplicationTable": "לוח הכפל",
         "orderOfOperations": "סדר פעולות חשבון",
+        "fractionAddition": "חיבור שברים",
+        "leastCommonDenominator": "המכנה המשותף הקטן ביותר",
         "fraction": "שטח מוצל - שברים, עשרוניים ואחוזים"
       }
     },
@@ -75,7 +85,101 @@
       "accuracy": "דיוק",
       "time": "זמן",
       "startNew": "התחל תרגול חדש",
-      "backToTests": "חזור לתרגול"
+      "backToTests": "חזור לתרגול",
+      "decimal": "עשרוני",
+      "fraction": "שבר",
+      "numerator": "מונה",
+      "denominator": "מכנה",
+      "clickToRetry": "לחץ לנסות שוב תרגיל זה"
+    },
+    "multiplicationTable": {
+      "title": "לוח הכפל",
+      "back": "חזרה",
+      "selectCount": "כמה תרגילים?",
+      "exercises": "תרגילים",
+      "progress": "התקדמות",
+      "score": "ציון",
+      "streak": "רצף",
+      "checkAnswer": "בדוק תשובה",
+      "correct": "נכון!",
+      "inARow": "ברצף!",
+      "notQuite": "לא ממש!",
+      "answerIs": "התשובה היא",
+      "typeAnswer": "כפול את המספרים!",
+      "onFire": "🌟 אתה שולט בכפל! המשך כך!",
+      "amazing": "⭐ מדהים! אתה עושה מצוין!",
+      "completedExercises": "תרגילים שהושלמו",
+      "perfectScore": "🎉 ציון מושלם!",
+      "greatJob": "🌟 עבודה מצוינת!",
+      "wellDone": "👏 כל הכבוד!",
+      "keepPracticing": "💪 המשך להתאמן!",
+      "testComplete": "התרגול הושלם!",
+      "accuracy": "דיוק",
+      "time": "זמן",
+      "yourScore": "הציון שלך",
+      "startNew": "התחל תרגול חדש",
+      "backToTests": "חזור לתרגול",
+      "clickToRetry": "לחץ לנסות שוב תרגיל זה"
+    },
+    "leastCommonDenominator": {
+      "title": "המכנה המשותף הקטן ביותר",
+      "question": "מצא את המכנה המשותף הקטן ביותר (מ.מ.ק) עבור:",
+      "lcd": "מ.מ.ק",
+      "back": "חזרה",
+      "selectCount": "כמה תרגילים?",
+      "exercises": "תרגילים",
+      "progress": "התקדמות",
+      "score": "ציון",
+      "streak": "רצף",
+      "checkAnswer": "בדוק תשובה",
+      "correct": "נכון!",
+      "inARow": "ברצף!",
+      "notQuite": "לא ממש!",
+      "answerIs": "התשובה היא",
+      "typeAnswer": "מצא את המ.מ.ק!",
+      "onFire": "🌟 אתה שולט במ.מ.ק! המשך כך!",
+      "amazing": "⭐ מדהים! אתה עושה מצוין!",
+      "completedExercises": "תרגילים שהושלמו",
+      "perfectScore": "🎉 ציון מושלם!",
+      "greatJob": "🌟 עבודה מצוינת!",
+      "wellDone": "👏 כל הכבוד!",
+      "keepPracticing": "💪 המשך להתאמן!",
+      "testComplete": "התרגול הושלם!",
+      "accuracy": "דיוק",
+      "time": "זמן",
+      "yourScore": "הציון שלך",
+      "startNew": "התחל תרגול חדש",
+      "backToTests": "חזור לתרגול",
+      "clickToRetry": "לחץ לנסות שוב תרגיל זה"
+    },
+    "fractionAddition": {
+      "title": "חיבור שברים",
+      "back": "חזרה",
+      "selectCount": "כמה תרגילים?",
+      "exercises": "תרגילים",
+      "progress": "התקדמות",
+      "score": "ציון",
+      "streak": "רצף",
+      "checkAnswer": "בדוק תשובה",
+      "correct": "נכון!",
+      "inARow": "ברצף!",
+      "notQuite": "לא ממש!",
+      "answerIs": "התשובה היא",
+      "typeAnswer": "חבר את השברים!",
+      "onFire": "🌟 אתה שולט בשברים! המשך כך!",
+      "amazing": "⭐ מדהים! אתה עושה מצוין!",
+      "completedExercises": "תרגילים שהושלמו",
+      "perfectScore": "🎉 ציון מושלם!",
+      "greatJob": "🌟 עבודה מצוינת!",
+      "wellDone": "👏 כל הכבוד!",
+      "keepPracticing": "💪 המשך להתאמן!",
+      "testComplete": "התרגול הושלם!",
+      "accuracy": "דיוק",
+      "time": "זמן",
+      "yourScore": "הציון שלך",
+      "startNew": "התחל תרגול חדש",
+      "backToTests": "חזור לתרגול",
+      "clickToRetry": "לחץ לנסות שוב תרגיל זה"
     },
     "fractionTest": {
       "title": "שטח מוצלל - שברים, עשרוניים ואחוזים",
@@ -87,7 +191,6 @@
       "accuracy": "דיוק",
       "time": "זמן",
       "squareDivided": "הריבוע למטה מחולק ל-{{total}} ריבועים קטנים שווים.",
-      "squaresShaded": "{{count}} מהם מוצלים.",
       "whichRepresent": "איזה מהאפשרויות הבאות מייצגות את החלק המוצל?",
       "selectAll": "בחר את כל התשובות הנכונות:",
       "checkAnswers": "בדוק תשובות",
@@ -102,36 +205,6 @@
       "testComplete": "התרגול הושלם!",
       "startNew": "התחל תרגול חדש",
       "backToTests": "חזור לתרגול"
-    },
-    "expenseSplitter": {
-      "title": "חלוקת הוצאות אוזי",
-      "whoPaid": "מי שילם? (שם משפחה)",
-      "amount": "סכום",
-      "currency": {
-        "shekel": "₪ (שקל)",
-        "dollar": "$ (דולר)",
-        "euro": "€ (יורו)"
-      },
-      "whoParticipated": "מי השתתף:",
-      "addExpense": "הוסף הוצאה",
-      "clearSaved": "נקה שמורים",
-      "expenses": "הוצאות",
-      "noExpenses": "אין הוצאות עדיין. הוסף את הראשונה למעלה.",
-      "paid": "שילם",
-      "sharedBy": "משותף עם:",
-      "alerts": {
-        "enterPayer": "אנא הזן מי שילם (שם משפחה).",
-        "enterAmount": "אנא הזן סכום תקין.",
-        "selectParticipant": "אנא בחר לפחות משפחה אחת משתתפת.",
-        "confirmClear": "למחוק את כל ההוצאות השמורות?"
-      },
-      "families": {
-        "familyA": "משפחה א",
-        "familyB": "משפחה ב",
-        "familyC": "משפחה ג",
-        "familyD": "משפחה ד",
-        "familyE": "משפחה ה"
-      }
     }
   }
 }

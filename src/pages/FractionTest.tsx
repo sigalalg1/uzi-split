@@ -80,8 +80,9 @@ export default function FractionTest() {
   const [difficulty, setDifficulty] = useState<number | null>(null);
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
-  const generateQuestion = (level: number): Question => {
+  const generateQuestion = (level: number, existingQuestions: Set<string> = new Set()): Question => {
     // Generate percentages based on difficulty level
     let percentages: number[];
 
@@ -110,83 +111,168 @@ export default function FractionTest() {
     const shadedCount = percentage;
 
     // Generate correct options
-    const correctFractions: string[] = [];
-    const correctDecimals: string[] = [];
-    const correctPercentages: string[] = [];
+    const correctFractions: Set<string> = new Set();
+    const correctDecimals: Set<string> = new Set();
+    const correctPercentages: Set<string> = new Set();
 
     // Main fraction
     const mainFraction = `${shadedCount}/${totalCount}`;
-    correctFractions.push(mainFraction);
+    correctFractions.add(mainFraction);
 
     // Simplified fraction
     const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
     const divisor = gcd(shadedCount, totalCount);
     const simplifiedNum = shadedCount / divisor;
     const simplifiedDen = totalCount / divisor;
-    correctFractions.push(`${simplifiedNum}/${simplifiedDen}`);
+    const simplifiedFraction = `${simplifiedNum}/${simplifiedDen}`;
+    if (simplifiedFraction !== mainFraction) {
+      correctFractions.add(simplifiedFraction);
+    }
 
     // Additional equivalent fractions
     if (simplifiedNum * 2 <= 20 && simplifiedDen * 2 <= 50) {
-      correctFractions.push(`${simplifiedNum * 2}/${simplifiedDen * 2}`);
+      const fraction = `${simplifiedNum * 2}/${simplifiedDen * 2}`;
+      if (!correctFractions.has(fraction)) {
+        correctFractions.add(fraction);
+      }
     }
     if (simplifiedNum * 3 <= 20 && simplifiedDen * 3 <= 50) {
-      correctFractions.push(`${simplifiedNum * 3}/${simplifiedDen * 3}`);
+      const fraction = `${simplifiedNum * 3}/${simplifiedDen * 3}`;
+      if (!correctFractions.has(fraction)) {
+        correctFractions.add(fraction);
+      }
     }
 
     // Correct decimal
-    correctDecimals.push((shadedCount / totalCount).toFixed(2).replace(/\.?0+$/, ""));
+    const correctDecimal = (shadedCount / totalCount).toFixed(2).replace(/\.?0+$/, "");
+    correctDecimals.add(correctDecimal);
 
     // Correct percentage
-    correctPercentages.push(`${percentage}%`);
+    correctPercentages.add(`${percentage}%`);
 
     // Generate incorrect options
-    const incorrectFractions: string[] = [];
-    const incorrectDecimals: string[] = [];
-    const incorrectPercentages: string[] = [];
+    const incorrectFractions: Set<string> = new Set();
+    const incorrectDecimals: Set<string> = new Set();
+    const incorrectPercentages: Set<string> = new Set();
+    const allUsedValues: Set<string> = new Set([
+      ...Array.from(correctFractions),
+      ...Array.from(correctDecimals),
+      ...Array.from(correctPercentages),
+    ]);
 
     // Incorrect fractions (wrong numerator or denominator)
-    incorrectFractions.push(`${shadedCount + 10}/${totalCount + 30}`);
-    incorrectFractions.push(`${Math.min(shadedCount + 5, 95)}/${totalCount - 10}`);
+    const wrongFrac1 = `${shadedCount + 10}/${totalCount + 30}`;
+    if (!allUsedValues.has(wrongFrac1)) {
+      incorrectFractions.add(wrongFrac1);
+      allUsedValues.add(wrongFrac1);
+    }
+
+    const wrongFrac2 = `${Math.min(shadedCount + 5, 95)}/${totalCount - 10}`;
+    if (!allUsedValues.has(wrongFrac2)) {
+      incorrectFractions.add(wrongFrac2);
+      allUsedValues.add(wrongFrac2);
+    }
+
+    // Add more incorrect fractions if needed
+    let attempts = 0;
+    while (incorrectFractions.size < 3 && attempts < 20) {
+      const offset = Math.floor(Math.random() * 30) + 5;
+      const wrongFrac = `${Math.max(1, Math.min(shadedCount + offset, 99))}/${totalCount + Math.floor(Math.random() * 20) - 10}`;
+      if (!allUsedValues.has(wrongFrac) && !wrongFrac.includes("-")) {
+        incorrectFractions.add(wrongFrac);
+        allUsedValues.add(wrongFrac);
+      }
+      attempts++;
+    }
 
     // Incorrect decimals
     const wrongDecimal1 = (shadedCount / totalCount / 10).toFixed(2);
-    const wrongDecimal2 = (shadedCount / totalCount * 10).toFixed(2);
-    if (parseFloat(wrongDecimal1) !== shadedCount / totalCount) {
-      incorrectDecimals.push(wrongDecimal1);
+    if (parseFloat(wrongDecimal1) !== shadedCount / totalCount && !allUsedValues.has(wrongDecimal1)) {
+      incorrectDecimals.add(wrongDecimal1);
+      allUsedValues.add(wrongDecimal1);
     }
-    if (parseFloat(wrongDecimal2) <= 1) {
-      incorrectDecimals.push(wrongDecimal2);
+
+    const wrongDecimal2 = (shadedCount / totalCount * 10).toFixed(2);
+    if (parseFloat(wrongDecimal2) <= 1 && !allUsedValues.has(wrongDecimal2)) {
+      incorrectDecimals.add(wrongDecimal2);
+      allUsedValues.add(wrongDecimal2);
+    }
+
+    // Add another incorrect decimal
+    const wrongDecimal3 = ((shadedCount + 5) / totalCount).toFixed(2);
+    if (!allUsedValues.has(wrongDecimal3)) {
+      incorrectDecimals.add(wrongDecimal3);
+      allUsedValues.add(wrongDecimal3);
     }
 
     // Incorrect percentages
-    incorrectPercentages.push(`${Math.min(percentage + 10, 100)}%`);
-    incorrectPercentages.push(`${Math.max(percentage - 15, 1)}%`);
+    const wrongPercent1 = `${Math.min(percentage + 10, 100)}%`;
+    if (!allUsedValues.has(wrongPercent1)) {
+      incorrectPercentages.add(wrongPercent1);
+      allUsedValues.add(wrongPercent1);
+    }
 
-    // Combine all options
+    const wrongPercent2 = `${Math.max(percentage - 15, 1)}%`;
+    if (!allUsedValues.has(wrongPercent2)) {
+      incorrectPercentages.add(wrongPercent2);
+      allUsedValues.add(wrongPercent2);
+    }
+
+    // Add more incorrect percentages
+    const wrongPercent3 = `${Math.min(percentage + 25, 100)}%`;
+    if (!allUsedValues.has(wrongPercent3)) {
+      incorrectPercentages.add(wrongPercent3);
+      allUsedValues.add(wrongPercent3);
+    }
+
+    // Combine all options (convert Sets to Arrays)
     const allOptions: QuestionOption[] = [
-      ...correctFractions.map(v => ({ value: v, isCorrect: true })),
-      ...correctDecimals.map(v => ({ value: v, isCorrect: true })),
-      ...correctPercentages.map(v => ({ value: v, isCorrect: true })),
-      ...incorrectFractions.map(v => ({ value: v, isCorrect: false })),
-      ...incorrectDecimals.map(v => ({ value: v, isCorrect: false })),
-      ...incorrectPercentages.map(v => ({ value: v, isCorrect: false })),
+      ...Array.from(correctFractions).map(v => ({ value: v, isCorrect: true })),
+      ...Array.from(correctDecimals).map(v => ({ value: v, isCorrect: true })),
+      ...Array.from(correctPercentages).map(v => ({ value: v, isCorrect: true })),
+      ...Array.from(incorrectFractions).map(v => ({ value: v, isCorrect: false })),
+      ...Array.from(incorrectDecimals).map(v => ({ value: v, isCorrect: false })),
+      ...Array.from(incorrectPercentages).map(v => ({ value: v, isCorrect: false })),
     ];
 
     // Shuffle options
     const shuffledOptions = allOptions.sort(() => Math.random() - 0.5);
 
-    return {
+    const result = {
       shadedCount,
       totalCount,
       percentage,
       options: shuffledOptions,
     };
+
+    // Check for duplicates
+    const questionKey = `${shadedCount}/${totalCount}`;
+
+    if (existingQuestions.has(questionKey)) {
+      let attempts = 0;
+      while (attempts < 10) {
+        const newQuestion = generateQuestion(level, existingQuestions);
+        const newKey = `${newQuestion.shadedCount}/${newQuestion.totalCount}`;
+        if (!existingQuestions.has(newKey)) {
+          return newQuestion;
+        }
+        attempts++;
+      }
+    }
+
+    return result;
   };
 
   const startGame = (count: number, level: number) => {
     setMaxQuestions(count);
     setDifficulty(level);
-    setCurrentQuestion(generateQuestion(level));
+    const newUsedQuestions = new Set<string>();
+    setUsedQuestions(newUsedQuestions);
+    const firstQuestion = generateQuestion(level, newUsedQuestions);
+    const firstKey = `${firstQuestion.shadedCount}/${firstQuestion.totalCount}`;
+    newUsedQuestions.add(firstKey);
+    setUsedQuestions(newUsedQuestions);
+    setCurrentQuestion(firstQuestion);
     setIsTimerRunning(true);
     setScore(0);
     setTotalQuestions(0);
@@ -284,7 +370,14 @@ export default function FractionTest() {
       setTimeout(() => {
         setShowFeedback(false);
         setSelectedOptions(new Set());
-        setCurrentQuestion(generateQuestion(difficulty!));
+        const nextQuestion = generateQuestion(difficulty!, usedQuestions);
+        setUsedQuestions(prev => {
+          const newSet = new Set(prev);
+          const key = `${nextQuestion.shadedCount}/${nextQuestion.totalCount}`;
+          newSet.add(key);
+          return newSet;
+        });
+        setCurrentQuestion(nextQuestion);
       }, 2000);
     }
   };
@@ -428,7 +521,12 @@ export default function FractionTest() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { setMaxQuestions(null); setDifficulty(null); }}
+              onClick={() => {
+                setMaxQuestions(null);
+                setDifficulty(null);
+                setSelectedOptions(new Set());
+                setTempCount(null);
+              }}
               colorScheme="purple"
               size="lg"
               flex={1}
@@ -509,8 +607,6 @@ export default function FractionTest() {
             <VStack spacing={3}>
               <Text fontSize="md" fontWeight="bold" color="gray.700">
                 {t("fractionTest.squareDivided", { total: currentQuestion.totalCount })}
-                <br />
-                {t("fractionTest.squaresShaded", { count: currentQuestion.shadedCount })}
               </Text>
 
               {/* Visual Grid */}
