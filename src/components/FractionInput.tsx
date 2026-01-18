@@ -86,6 +86,7 @@ export default function FractionInput({
             maxWidth="120px"
             autoFocus={autoFocus}
             type="number"
+            inputMode="decimal"
             step="0.01"
             borderWidth={3}
             borderColor={`${colorScheme}.400`}
@@ -118,6 +119,7 @@ export default function FractionInput({
               maxWidth="120px"
               autoFocus={autoFocus}
               type="number"
+              inputMode="numeric"
               borderWidth={3}
               borderColor={`${colorScheme}.400`}
               _focus={{
@@ -142,6 +144,7 @@ export default function FractionInput({
               minWidth="120px"
               maxWidth="120px"
               type="number"
+              inputMode="numeric"
               borderWidth={3}
               borderColor={`${colorScheme}.400`}
               _focus={{
