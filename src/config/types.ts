@@ -15,7 +15,12 @@ export type GeneratorName =
   | "fractionAddition"
   | "leastCommonDenominator"
   | "fractionMixed"
-  | "numberLine";
+  | "numberLine"
+  | "compareNumbers"
+  | "completeSequence"
+  | "findMissingNumber"
+  | "placeValue"
+  | "locateNumberLine";
 
 export type ValidatorName = "numberValidator" | "fractionValidator";
 
@@ -93,11 +98,33 @@ export interface NumberLineExercise extends BaseExercise {
   answer: number;
 }
 
+export interface CompareNumbersExercise extends BaseExercise {
+  num1: number;
+  num2: number;
+  comparison: "greater" | "lesser" | "equal";
+  answer: number; // The correct number based on comparison
+}
+
+export interface SequenceExercise extends BaseExercise {
+  sequence: number[];
+  missingIndex: number;
+  answer: number;
+}
+
+export interface PlaceValueExercise extends BaseExercise {
+  number: number;
+  place: "hundreds" | "tens" | "units";
+  answer: number;
+}
+
 export type Exercise =
   | NumberExercise
   | FractionExercise
   | OrderOfOperationsExercise
-  | NumberLineExercise;
+  | NumberLineExercise
+  | CompareNumbersExercise
+  | SequenceExercise
+  | PlaceValueExercise;
 
 export type CompletedExercise = Exercise & {
   userAnswer: number | string;

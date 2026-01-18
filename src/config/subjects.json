@@ -41,12 +41,20 @@
       "order": 5
     },
     {
+      "id": "natural-numbers",
+      "i18nKey": "practicePage.subjects.naturalNumbers",
+      "icon": "🔢",
+      "color": "teal",
+      "description": "practicePage.descriptions.naturalNumbers",
+      "order": 6
+    },
+    {
       "id": "number-line",
       "i18nKey": "practicePage.subjects.numberLine",
       "icon": "📏",
       "color": "purple",
       "description": "practicePage.descriptions.numberLine",
-      "order": 6
+      "order": 7
     }
   ]
 }
