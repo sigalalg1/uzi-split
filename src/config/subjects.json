@@ -1,0 +1,53 @@
+{
+  "subjects": [
+    {
+      "id": "addition",
+      "i18nKey": "practicePage.subjects.addition",
+      "icon": "➕",
+      "color": "blue",
+      "description": "practicePage.descriptions.addition",
+      "order": 1
+    },
+    {
+      "id": "subtraction",
+      "i18nKey": "practicePage.subjects.subtraction",
+      "icon": "➖",
+      "color": "pink",
+      "description": "practicePage.descriptions.subtraction",
+      "order": 2
+    },
+    {
+      "id": "multiplication",
+      "i18nKey": "practicePage.subjects.multiplication",
+      "icon": "✖️",
+      "color": "red",
+      "description": "practicePage.descriptions.multiplication",
+      "order": 3
+    },
+    {
+      "id": "order-of-operations",
+      "i18nKey": "practicePage.subjects.orderOfOperations",
+      "icon": "🔢",
+      "color": "purple",
+      "description": "practicePage.descriptions.orderOfOperations",
+      "order": 4
+    },
+    {
+      "id": "fractions",
+      "i18nKey": "practicePage.subjects.fractions",
+      "icon": "½",
+      "color": "green",
+      "description": "practicePage.descriptions.fractions",
+      "order": 5
+    },
+    {
+      "id": "number-line",
+      "i18nKey": "practicePage.subjects.numberLine",
+      "icon": "📏",
+      "color": "purple",
+      "description": "practicePage.descriptions.numberLine",
+      "order": 6
+    }
+  ]
+}
+

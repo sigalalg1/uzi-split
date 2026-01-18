@@ -1,0 +1,273 @@
+{
+  "tests": {
+    "addition": [
+      {
+        "id": "add-without-conversion",
+        "i18nKey": "practicePage.exercises.addWithoutConversion",
+        "url": "/practice/addition/add-without-conversion",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "addition",
+          "operation": "+",
+          "generator": "additionWithoutConversion",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "add-with-conversion",
+        "i18nKey": "practicePage.exercises.addWithConversion",
+        "url": "/practice/addition/add-with-conversion",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "addition",
+          "operation": "+",
+          "generator": "additionWithConversion",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "add-advanced",
+        "i18nKey": "practicePage.exercises.addAdvanced",
+        "url": "/practice/addition/add-advanced",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "addition",
+          "operation": "+",
+          "generator": "additionAdvanced",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "add-advanced-3digits",
+        "i18nKey": "practicePage.exercises.addAdvanced3Digits",
+        "url": "/practice/addition/add-advanced-3digits",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "addition",
+          "operation": "+",
+          "generator": "additionAdvanced3Digits",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
+    ],
+    "subtraction": [
+      {
+        "id": "subtract-without-conversion",
+        "i18nKey": "practicePage.exercises.subtractWithoutConversion",
+        "url": "/practice/subtraction/subtract-without-conversion",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "subtraction",
+          "operation": "-",
+          "generator": "subtractionWithoutConversion",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "subtract-with-conversion",
+        "i18nKey": "practicePage.exercises.subtractWithConversion",
+        "url": "/practice/subtraction/subtract-with-conversion",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "subtraction",
+          "operation": "-",
+          "generator": "subtractionWithConversion",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "subtract-advanced-2digits",
+        "i18nKey": "practicePage.exercises.subtractAdvanced2Digits",
+        "url": "/practice/subtraction/subtract-advanced-2digits",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "subtraction",
+          "operation": "-",
+          "generator": "subtractionAdvanced2Digits",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "subtract-advanced-3digits",
+        "i18nKey": "practicePage.exercises.subtractAdvanced3Digits",
+        "url": "/practice/subtraction/subtract-advanced-3digits",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "subtraction",
+          "operation": "-",
+          "generator": "subtractionAdvanced3Digits",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
+    ],
+    "multiplication": [
+      {
+        "id": "multiplication-table",
+        "i18nKey": "practicePage.exercises.multiplicationTable",
+        "url": "/practice/multiplication/multiplication-table",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "multiplication",
+          "operation": "×",
+          "generator": "multiplicationTable",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "multiply-advanced",
+        "i18nKey": "practicePage.exercises.multiplyAdvanced",
+        "url": "/practice/multiplication/multiply-advanced",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "multiplication",
+          "operation": "×",
+          "generator": "multiplicationAdvanced",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
+    ],
+    "order-of-operations": [
+      {
+        "id": "order-of-operations",
+        "i18nKey": "practicePage.exercises.orderOfOperations",
+        "url": "/practice/order-of-operations/order-of-operations",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "order-of-operations",
+          "operation": "mixed",
+          "generator": "orderOfOperations",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
+    ],
+    "fractions": [
+      {
+        "id": "fraction-addition",
+        "i18nKey": "practicePage.exercises.fractionAddition",
+        "url": "/practice/fractions/fraction-addition",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "fractions",
+          "operation": "+",
+          "generator": "fractionAddition",
+          "validator": "fractionValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          },
+          "inputType": "fraction"
+        }
+      },
+      {
+        "id": "least-common-denominator",
+        "i18nKey": "practicePage.exercises.leastCommonDenominator",
+        "url": "/practice/fractions/least-common-denominator",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "fractions",
+          "operation": "lcd",
+          "generator": "leastCommonDenominator",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      },
+      {
+        "id": "fraction",
+        "i18nKey": "practicePage.exercises.fraction",
+        "url": "/practice/fractions/fraction",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "fractions",
+          "operation": "mixed",
+          "generator": "fractionMixed",
+          "validator": "fractionValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          },
+          "inputType": "fraction"
+        }
+      }
+    ],
+    "number-line": [
+      {
+        "id": "number-line",
+        "i18nKey": "practicePage.exercises.numberLine",
+        "url": "/practice/number-line/number-line",
+        "componentType": "MathTest",
+        "config": {
+          "testType": "number-line",
+          "operation": "position",
+          "generator": "numberLine",
+          "validator": "numberValidator",
+          "supportsHistory": true,
+          "difficultyLevels": {
+            "min": 1,
+            "max": 5
+          }
+        }
+      }
+    ]
+  }
+}
