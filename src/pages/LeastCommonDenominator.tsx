@@ -49,6 +49,7 @@ export default function LeastCommonDenominator() {
   const [difficulty, setDifficulty] = useState<number | null>(null);
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
   // GCD function
   const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
@@ -61,12 +62,12 @@ export default function LeastCommonDenominator() {
     return numbers.reduce((acc, num) => lcm(acc, num), 1);
   };
 
-  const generateExercise = (level: number): Exercise => {
+  const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
     let denominators: number[];
-    
+
     // Determine number of fractions based on difficulty
     const numFractions = level >= 4 ? 3 : 2;
-    
+
     switch (level) {
       case 1: // Very easy: small numbers, easy LCD
         denominators = [];
@@ -74,51 +75,74 @@ export default function LeastCommonDenominator() {
         denominators.push(base1);
         denominators.push(base1 * (Math.floor(Math.random() * 2) + 2)); // Multiple of first
         break;
-        
+
       case 2: // Easy: small numbers
         denominators = [];
         for (let i = 0; i < numFractions; i++) {
           denominators.push(Math.floor(Math.random() * 5) + 2); // 2-6
         }
         break;
-        
+
       case 3: // Medium: larger numbers
         denominators = [];
         for (let i = 0; i < numFractions; i++) {
           denominators.push(Math.floor(Math.random() * 7) + 3); // 3-9
         }
         break;
-        
+
       case 4: // Hard: 3 numbers, larger range
         denominators = [];
         for (let i = 0; i < 3; i++) {
           denominators.push(Math.floor(Math.random() * 8) + 4); // 4-11
         }
         break;
-        
+
       case 5: // Very hard: 3 numbers, largest range
         denominators = [];
         for (let i = 0; i < 3; i++) {
           denominators.push(Math.floor(Math.random() * 10) + 5); // 5-14
         }
         break;
-        
+
       default:
         denominators = [2, 3];
     }
 
     const lcd = lcmMultiple(denominators);
 
-    return {
+    const result = {
       denominators,
       lcd,
     };
+
+    // Check for duplicates (sorted to catch permutations)
+    const questionKey = denominators.slice().sort((a, b) => a - b).join(',');
+
+    if (existingQuestions.has(questionKey)) {
+      let attempts = 0;
+      while (attempts < 10) {
+        const newExercise = generateExercise(level, existingQuestions);
+        const newKey = newExercise.denominators.slice().sort((a, b) => a - b).join(',');
+        if (!existingQuestions.has(newKey)) {
+          return newExercise;
+        }
+        attempts++;
+      }
+    }
+
+    return result;
   };
 
   const startGame = (count: number, level: number) => {
     setMaxExercises(count);
     setDifficulty(level);
-    setCurrentExercise(generateExercise(level));
+    const newUsedQuestions = new Set<string>();
+    setUsedQuestions(newUsedQuestions);
+    const firstExercise = generateExercise(level, newUsedQuestions);
+    const firstKey = firstExercise.denominators.slice().sort((a, b) => a - b).join(',');
+    newUsedQuestions.add(firstKey);
+    setUsedQuestions(newUsedQuestions);
+    setCurrentExercise(firstExercise);
     setIsTimerRunning(true);
     setScore(0);
     setTotalQuestions(0);
@@ -206,7 +230,14 @@ export default function LeastCommonDenominator() {
         setShowFeedback(false);
         setIsCorrect(null);
         setUserAnswer("");
-        setCurrentExercise(generateExercise(difficulty!));
+        const nextExercise = generateExercise(difficulty!, usedQuestions);
+        setUsedQuestions(prev => {
+          const newSet = new Set(prev);
+          const key = nextExercise.denominators.slice().sort((a, b) => a - b).join(',');
+          newSet.add(key);
+          return newSet;
+        });
+        setCurrentExercise(nextExercise);
       }, 1500);
     }
   };
@@ -505,11 +536,13 @@ export default function LeastCommonDenominator() {
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="?"
-                  size="md"
+                  size="lg"
                   fontSize="3xl"
                   fontWeight="bold"
                   textAlign="center"
-                  width="150px"
+                  width="200px"
+                  minWidth="200px"
+                  maxWidth="200px"
                   autoFocus
                   type="number"
                   borderWidth={3}

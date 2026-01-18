@@ -77,19 +77,21 @@ export default function FractionInput({
             onChange={(e) => onDecimalChange(e.target.value)}
             onKeyPress={handleDecimalKeyPress}
             placeholder="?"
-            size="sm"
+            size="md"
             fontSize="2xl"
             fontWeight="bold"
             textAlign="center"
             width="120px"
+            minWidth="120px"
+            maxWidth="120px"
             autoFocus={autoFocus}
             type="number"
             step="0.01"
-            borderWidth={2}
+            borderWidth={3}
             borderColor={`${colorScheme}.400`}
             _focus={{
               borderColor: `${colorScheme}.500`,
-              boxShadow: `0 0 0 2px rgba(45, 212, 191, 0.3)`,
+              boxShadow: `0 0 0 3px rgba(45, 212, 191, 0.3)`,
             }}
             disabled={disabled}
           />
@@ -107,18 +109,20 @@ export default function FractionInput({
               onChange={(e) => onNumeratorChange(e.target.value)}
               onKeyPress={handleNumeratorKeyPress}
               placeholder="?"
-              size="sm"
+              size="md"
               fontSize="2xl"
               fontWeight="bold"
               textAlign="center"
               width="120px"
+              minWidth="120px"
+              maxWidth="120px"
               autoFocus={autoFocus}
               type="number"
-              borderWidth={2}
+              borderWidth={3}
               borderColor={`${colorScheme}.400`}
               _focus={{
                 borderColor: `${colorScheme}.500`,
-                boxShadow: `0 0 0 2px rgba(45, 212, 191, 0.3)`,
+                boxShadow: `0 0 0 3px rgba(45, 212, 191, 0.3)`,
               }}
               disabled={disabled}
             />
@@ -130,17 +134,19 @@ export default function FractionInput({
               onChange={(e) => onDenominatorChange(e.target.value)}
               onKeyPress={handleDenominatorKeyPress}
               placeholder="?"
-              size="sm"
+              size="md"
               fontSize="2xl"
               fontWeight="bold"
               textAlign="center"
               width="120px"
+              minWidth="120px"
+              maxWidth="120px"
               type="number"
-              borderWidth={2}
+              borderWidth={3}
               borderColor={`${colorScheme}.400`}
               _focus={{
                 borderColor: `${colorScheme}.500`,
-                boxShadow: `0 0 0 2px rgba(45, 212, 191, 0.3)`,
+                boxShadow: `0 0 0 3px rgba(45, 212, 191, 0.3)`,
               }}
               disabled={disabled}
             />

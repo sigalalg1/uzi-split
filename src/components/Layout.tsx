@@ -34,17 +34,19 @@ export default function Layout({ children }: LayoutProps) {
   const getBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
     const breadcrumbs = [{ name: t("app.title"), path: "/" }];
-    
+
     let currentPath = "";
     paths.forEach((path, index) => {
       currentPath += `/${path}`;
       let name = path;
-      
+
       // Translate known paths
       if (path === "practice") {
         name = t("app.practice");
       } else if (path === "addition") {
         name = t("practicePage.subjects.addition");
+      } else if (path === "multiplication") {
+        name = t("practicePage.subjects.multiplication");
       } else if (path === "fractions") {
         name = t("practicePage.subjects.fractions");
       } else if (path === "order-of-operations") {
@@ -53,6 +55,8 @@ export default function Layout({ children }: LayoutProps) {
         name = t("practicePage.exercises.addWithoutConversion");
       } else if (path === "add-with-conversion") {
         name = t("practicePage.exercises.addWithConversion");
+      } else if (path === "multiplication-table") {
+        name = t("practicePage.exercises.multiplicationTable");
       } else if (path === "fraction-addition") {
         name = t("practicePage.exercises.fractionAddition");
       } else if (path === "least-common-denominator") {
@@ -60,10 +64,10 @@ export default function Layout({ children }: LayoutProps) {
       } else if (path === "fraction") {
         name = t("practicePage.exercises.fraction");
       }
-      
+
       breadcrumbs.push({ name, path: currentPath });
     });
-    
+
     return breadcrumbs;
   };
 

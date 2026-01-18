@@ -60,11 +60,12 @@ export default function FractionAddition() {
   const [difficulty, setDifficulty] = useState<number | null>(null);
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
   // GCD function for simplifying fractions
   const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 
-  const generateExercise = (level: number): Exercise => {
+  const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
     let fraction1: Fraction, fraction2: Fraction;
 
     switch (level) {
@@ -120,18 +121,43 @@ export default function FractionAddition() {
     // Simplify answer
     const divisor = gcd(answerNum, commonDenom);
 
-    return {
+    const result = {
       fraction1,
       fraction2,
       answerNumerator: answerNum / divisor,
       answerDenominator: commonDenom / divisor,
     };
+
+    // Check for duplicates
+    const questionKey = `${fraction1.numerator}/${fraction1.denominator}+${fraction2.numerator}/${fraction2.denominator}`;
+    const questionKeyReverse = `${fraction2.numerator}/${fraction2.denominator}+${fraction1.numerator}/${fraction1.denominator}`;
+
+    if (existingQuestions.has(questionKey) || existingQuestions.has(questionKeyReverse)) {
+      let attempts = 0;
+      while (attempts < 10) {
+        const newExercise = generateExercise(level, existingQuestions);
+        const newKey = `${newExercise.fraction1.numerator}/${newExercise.fraction1.denominator}+${newExercise.fraction2.numerator}/${newExercise.fraction2.denominator}`;
+        const newKeyReverse = `${newExercise.fraction2.numerator}/${newExercise.fraction2.denominator}+${newExercise.fraction1.numerator}/${newExercise.fraction1.denominator}`;
+        if (!existingQuestions.has(newKey) && !existingQuestions.has(newKeyReverse)) {
+          return newExercise;
+        }
+        attempts++;
+      }
+    }
+
+    return result;
   };
 
   const startGame = (count: number, level: number) => {
     setMaxExercises(count);
     setDifficulty(level);
-    setCurrentExercise(generateExercise(level));
+    const newUsedQuestions = new Set<string>();
+    setUsedQuestions(newUsedQuestions);
+    const firstExercise = generateExercise(level, newUsedQuestions);
+    const firstKey = `${firstExercise.fraction1.numerator}/${firstExercise.fraction1.denominator}+${firstExercise.fraction2.numerator}/${firstExercise.fraction2.denominator}`;
+    newUsedQuestions.add(firstKey);
+    setUsedQuestions(newUsedQuestions);
+    setCurrentExercise(firstExercise);
     setIsTimerRunning(true);
     setScore(0);
     setTotalQuestions(0);
@@ -265,7 +291,14 @@ export default function FractionAddition() {
         setNumerator("");
         setDenominator("");
         setDecimalValue("");
-        setCurrentExercise(generateExercise(difficulty!));
+        const nextExercise = generateExercise(difficulty!, usedQuestions);
+        setUsedQuestions(prev => {
+          const newSet = new Set(prev);
+          const key = `${nextExercise.fraction1.numerator}/${nextExercise.fraction1.denominator}+${nextExercise.fraction2.numerator}/${nextExercise.fraction2.denominator}`;
+          newSet.add(key);
+          return newSet;
+        });
+        setCurrentExercise(nextExercise);
       }, 1500);
     }
   };

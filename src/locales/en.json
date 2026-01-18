@@ -20,12 +20,14 @@
       "selectDifficulty": "Select difficulty level:",
       "subjects": {
         "addition": "Addition",
+        "multiplication": "Multiplication",
         "orderOfOperations": "Order of Operations",
         "fractions": "Fractions"
       },
       "exercises": {
         "addWithoutConversion": "Addition Without Conversion",
         "addWithConversion": "Addition With Conversion",
+        "multiplicationTable": "Multiplication Table",
         "orderOfOperations": "Order of Operations",
         "fractionAddition": "Fraction Addition",
         "leastCommonDenominator": "Least Common Denominator",
@@ -88,6 +90,35 @@
       "fraction": "Fraction",
       "numerator": "Numerator",
       "denominator": "Denominator",
+      "clickToRetry": "Click to retry this exercise"
+    },
+    "multiplicationTable": {
+      "title": "Multiplication Table",
+      "back": "Back",
+      "selectCount": "How many exercises?",
+      "exercises": "Exercises",
+      "progress": "Progress",
+      "score": "Score",
+      "streak": "Streak",
+      "checkAnswer": "Check Answer",
+      "correct": "Correct!",
+      "inARow": "in a row!",
+      "notQuite": "Not quite!",
+      "answerIs": "The answer is",
+      "typeAnswer": "Multiply the numbers!",
+      "onFire": "🌟 You're mastering multiplication! Keep going!",
+      "amazing": "⭐ Amazing! You're doing great!",
+      "completedExercises": "Completed Exercises",
+      "perfectScore": "🎉 Perfect Score!",
+      "greatJob": "🌟 Great Job!",
+      "wellDone": "👏 Well Done!",
+      "keepPracticing": "💪 Keep Practicing!",
+      "testComplete": "Practice Complete!",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "yourScore": "Your Score",
+      "startNew": "Start New Practice",
+      "backToTests": "Back to Practice",
       "clickToRetry": "Click to retry this exercise"
     },
     "leastCommonDenominator": {
@@ -174,36 +205,6 @@
       "testComplete": "Practice Complete!",
       "startNew": "Start New Practice",
       "backToTests": "Back to Practice"
-    },
-    "expenseSplitter": {
-      "title": "Uzi Split",
-      "whoPaid": "Who paid? (Family name)",
-      "amount": "Amount",
-      "currency": {
-        "shekel": "₪ (Shekel)",
-        "dollar": "$ (Dollar)",
-        "euro": "€ (Euro)"
-      },
-      "whoParticipated": "Who participated:",
-      "addExpense": "Add Expense",
-      "clearSaved": "Clear saved",
-      "expenses": "Expenses",
-      "noExpenses": "No expenses yet. Add your first one above.",
-      "paid": "paid",
-      "sharedBy": "Shared by:",
-      "alerts": {
-        "enterPayer": "Please enter who paid (family name).",
-        "enterAmount": "Please enter a valid amount.",
-        "selectParticipant": "Please select at least one participating family.",
-        "confirmClear": "Clear all saved expenses?"
-      },
-      "families": {
-        "familyA": "Family A",
-        "familyB": "Family B",
-        "familyC": "Family C",
-        "familyD": "Family D",
-        "familyE": "Family E"
-      }
     }
   }
 }

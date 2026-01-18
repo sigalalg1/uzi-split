@@ -22,6 +22,19 @@ export const testData: TestSubject[] = [
     ],
   },
   {
+    subject: "multiplication",
+    subjectKey: "practicePage.subjects.multiplication",
+    tests: [
+      {
+        subject: "multiplication",
+        subjectKey: "practicePage.subjects.multiplication",
+        name: "multiplication-table",
+        text: "practicePage.exercises.multiplicationTable",
+        url: "/practice/multiplication/multiplication-table",
+      },
+    ],
+  },
+  {
     subject: "order-of-operations",
     subjectKey: "practicePage.subjects.orderOfOperations",
     tests: [

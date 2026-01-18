@@ -52,6 +52,7 @@ export default function OrderOfOperations() {
   const [difficulty, setDifficulty] = useState<number | null>(null);
   const [tempCount, setTempCount] = useState<number | null>(null);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
   // Safe math expression evaluator
   const evaluateExpression = (expr: string): number => {
@@ -66,7 +67,7 @@ export default function OrderOfOperations() {
     }
   };
 
-  const generateExercise = (level: number): Exercise => {
+  const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
     const operators = ['+', '-', '*', '/'];
     const complexity = Math.random();
 
@@ -116,14 +117,33 @@ export default function OrderOfOperations() {
 
       const answer = evaluateExpression(expression);
 
-      return { expression, answer: Math.round(answer * 100) / 100 };
+      const result = { expression, answer: Math.round(answer * 100) / 100 };
+
+      // Check for duplicates and regenerate if needed
+      if (existingQuestions.has(expression)) {
+        let attempts = 0;
+        while (attempts < 10) {
+          const newExercise = generateExercise(level, existingQuestions);
+          if (!existingQuestions.has(newExercise.expression)) {
+            return newExercise;
+          }
+          attempts++;
+        }
+      }
+
+      return result;
     }
   };
 
   const startGame = (count: number, level: number) => {
     setMaxExercises(count);
     setDifficulty(level);
-    setCurrentExercise(generateExercise(level));
+    const newUsedQuestions = new Set<string>();
+    setUsedQuestions(newUsedQuestions);
+    const firstExercise = generateExercise(level, newUsedQuestions);
+    newUsedQuestions.add(firstExercise.expression);
+    setUsedQuestions(newUsedQuestions);
+    setCurrentExercise(firstExercise);
     setIsTimerRunning(true);
     setScore(0);
     setTotalQuestions(0);
@@ -155,7 +175,7 @@ export default function OrderOfOperations() {
       expression: exercise.expression,
       answer: exercise.answer,
     });
-    
+
     // Clear inputs for retry
     setUserAnswer("");
     setNumerator("");
@@ -168,7 +188,7 @@ export default function OrderOfOperations() {
     if (!currentExercise) return { isCorrect: false, userAnswerValue: 0 };
 
     let userAnswerValue: number;
-    
+
     if (answerMode === "decimal") {
       // Decimal mode
       if (userAnswer === "") return { isCorrect: false, userAnswerValue: 0 };
@@ -184,13 +204,13 @@ export default function OrderOfOperations() {
     // Check if answer is correct (with small tolerance for floating point)
     const tolerance = 0.01;
     const isCorrect = Math.abs(userAnswerValue - currentExercise.answer) < tolerance;
-    
+
     return { isCorrect, userAnswerValue };
   };
 
   const handleSubmit = () => {
     if (!currentExercise) return;
-    
+
     // Check if user has entered an answer
     if (answerMode === "decimal" && userAnswer === "") return;
     if (answerMode === "fraction" && (numerator === "" || denominator === "")) return;
@@ -247,7 +267,13 @@ export default function OrderOfOperations() {
         setUserAnswer("");
         setNumerator("");
         setDenominator("");
-        setCurrentExercise(generateExercise(difficulty!));
+        const nextExercise = generateExercise(difficulty!, usedQuestions);
+        setUsedQuestions(prev => {
+          const newSet = new Set(prev);
+          newSet.add(nextExercise.expression);
+          return newSet;
+        });
+        setCurrentExercise(nextExercise);
       }, 1500);
     }
   };
@@ -404,8 +430,8 @@ export default function OrderOfOperations() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { 
-                setMaxExercises(null); 
+              onClick={() => {
+                setMaxExercises(null);
                 setDifficulty(null);
                 setUserAnswer("");
                 setNumerator("");
@@ -454,7 +480,7 @@ export default function OrderOfOperations() {
                       <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                         {exercise.isCorrect ? "✓" : "✗"}
                       </Text>
-                      <Text color="gray.700">{exercise.expression}</Text>
+                      <Text color="gray.700">{exercise.expression.replace(/\*/g, '×')}</Text>
                       <Text color="gray.500">=</Text>
                       <Text
                         color={exercise.isCorrect ? "green.600" : "red.600"}
@@ -566,89 +592,97 @@ export default function OrderOfOperations() {
                     repeatDelay: 2,
                   }}
                 >
-                  <Text color="orange.500">{currentExercise.expression}</Text>
+                  <Text color="orange.500">{currentExercise.expression.replace(/\*/g, '×')}</Text>
                 </MotionBox>
 
                 <Text color="gray.600">=</Text>
 
-                {/* Answer Input - Decimal or Fraction */}
-                {answerMode === "decimal" ? (
-                  <Input
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    onKeyPress={(e) => handleKeyPress(e)}
-                    placeholder="?"
-                    size="md"
-                    fontSize="3xl"
-                    fontWeight="bold"
-                    textAlign="center"
-                    width="150px"
-                    autoFocus
-                    type="number"
-                    step="0.01"
-                    borderWidth={3}
-                    borderColor="teal.400"
-                    _focus={{
-                      borderColor: "teal.500",
-                      boxShadow: "0 0 0 3px rgba(45, 212, 191, 0.3)",
-                    }}
-                    disabled={showFeedback}
-                  />
-                ) : (
-                  <VStack spacing={1} align="center">
-                    <Text fontSize="xs" color="gray.600" fontWeight="medium">
-                      {t("orderOfOperations.numerator")}
-                    </Text>
+                {/* Answer Input - Decimal or Fraction - Fixed width container */}
+                <Box width="200px" minWidth="200px" maxWidth="200px" minH="150px" display="flex" alignItems="center" justifyContent="center">
+                  {answerMode === "decimal" ? (
                     <Input
-                      name="numerator"
-                      value={numerator}
-                      onChange={(e) => setNumerator(e.target.value)}
-                      onKeyPress={(e) => {
-                        const denominatorRef = { current: document.querySelector('input[name="denominator"]') as HTMLInputElement };
-                        handleKeyPress(e, denominatorRef);
-                      }}
-                      placeholder="?"
-                      size="sm"
-                      fontSize="2xl"
-                      fontWeight="bold"
-                      textAlign="center"
-                      width="120px"
-                      autoFocus
-                      type="number"
-                      borderWidth={2}
-                      borderColor="teal.400"
-                      _focus={{
-                        borderColor: "teal.500",
-                        boxShadow: "0 0 0 2px rgba(45, 212, 191, 0.3)",
-                      }}
-                      disabled={showFeedback}
-                    />
-                    <Box width="120px" height="3px" bg="gray.600" my={1} />
-                    <Input
-                      name="denominator"
-                      value={denominator}
-                      onChange={(e) => setDenominator(e.target.value)}
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
                       onKeyPress={(e) => handleKeyPress(e)}
                       placeholder="?"
-                      size="sm"
-                      fontSize="2xl"
+                      size="lg"
+                      fontSize="3xl"
                       fontWeight="bold"
                       textAlign="center"
-                      width="120px"
+                      width="200px"
+                      minWidth="200px"
+                      maxWidth="200px"
+                      autoFocus
                       type="number"
-                      borderWidth={2}
-                      borderColor="teal.400"
+                      step="0.01"
+                      borderWidth={3}
+                      borderColor="orange.400"
                       _focus={{
-                        borderColor: "teal.500",
-                        boxShadow: "0 0 0 2px rgba(45, 212, 191, 0.3)",
+                        borderColor: "orange.500",
+                        boxShadow: "0 0 0 3px rgba(255, 140, 0, 0.3)",
                       }}
                       disabled={showFeedback}
                     />
-                    <Text fontSize="xs" color="gray.600" fontWeight="medium">
-                      {t("orderOfOperations.denominator")}
-                    </Text>
-                  </VStack>
-                )}
+                  ) : (
+                    <VStack spacing={1} align="center">
+                      <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                        {t("orderOfOperations.numerator")}
+                      </Text>
+                      <Input
+                        name="numerator"
+                        value={numerator}
+                        onChange={(e) => setNumerator(e.target.value)}
+                        onKeyPress={(e) => {
+                          const denominatorRef = { current: document.querySelector('input[name="denominator"]') as HTMLInputElement };
+                          handleKeyPress(e, denominatorRef);
+                        }}
+                        placeholder="?"
+                        size="md"
+                        fontSize="2xl"
+                        fontWeight="bold"
+                        textAlign="center"
+                        width="120px"
+                        minWidth="120px"
+                        maxWidth="120px"
+                        autoFocus
+                        type="number"
+                        borderWidth={3}
+                        borderColor="orange.400"
+                        _focus={{
+                          borderColor: "orange.500",
+                          boxShadow: "0 0 0 3px rgba(255, 140, 0, 0.3)",
+                        }}
+                        disabled={showFeedback}
+                      />
+                      <Box width="120px" height="3px" bg="gray.600" my={1} />
+                      <Input
+                        name="denominator"
+                        value={denominator}
+                        onChange={(e) => setDenominator(e.target.value)}
+                        onKeyPress={(e) => handleKeyPress(e)}
+                        placeholder="?"
+                        size="md"
+                        fontSize="2xl"
+                        fontWeight="bold"
+                        textAlign="center"
+                        width="120px"
+                        minWidth="120px"
+                        maxWidth="120px"
+                        type="number"
+                        borderWidth={3}
+                        borderColor="orange.400"
+                        _focus={{
+                          borderColor: "orange.500",
+                          boxShadow: "0 0 0 3px rgba(255, 140, 0, 0.3)",
+                        }}
+                        disabled={showFeedback}
+                      />
+                      <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                        {t("orderOfOperations.denominator")}
+                      </Text>
+                    </VStack>
+                  )}
+                </Box>
               </HStack>
 
               {/* Answer Mode Toggle */}
@@ -751,7 +785,7 @@ export default function OrderOfOperations() {
                         <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                           {exercise.isCorrect ? "✓" : "✗"}
                         </Text>
-                        <Text color="gray.700">{exercise.expression}</Text>
+                        <Text color="gray.700">{exercise.expression.replace(/\*/g, '×')}</Text>
                         <Text color="gray.500">=</Text>
                         <Text
                           color={exercise.isCorrect ? "green.600" : "red.600"}

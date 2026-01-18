@@ -8,7 +8,7 @@ export default function Practice() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(
-    new Set(["addition", "order-of-operations", "fractions"])
+    new Set(["addition", "multiplication", "order-of-operations", "fractions"])
   );
 
   const toggleSubject = (subject: string) => {
