@@ -4,7 +4,8 @@
       "title": "Mathemiko",
       "login": "Login",
       "test": "Test",
-      "practice": "Practice"
+      "practice": "Practice",
+      "testNotAvailable": "Test mode is not available yet"
     },
     "common": {
       "numerator": "Numerator",

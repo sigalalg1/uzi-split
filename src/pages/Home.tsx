@@ -1,81 +1,69 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Box, VStack, Heading, Button, Tooltip } from "@chakra-ui/react";
 
 export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleTest = () => {
-    console.log("Test clicked");
-    // TODO: Implement test functionality
-  };
-
   const handlePractice = () => {
     navigate("/practice");
   };
 
-  // Styles
-  const container: React.CSSProperties = {
-    minHeight: "calc(100vh - 70px)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  };
-
-  const title: React.CSSProperties = {
-    fontSize: 48,
-    fontWeight: 700,
-    marginBottom: 60,
-    color: "#2563eb",
-  };
-
-  const buttonContainer: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
-    width: "100%",
-    maxWidth: 400,
-  };
-
-  const primaryButton: React.CSSProperties = {
-    padding: "16px 32px",
-    borderRadius: 8,
-    border: "none",
-    background: "#2563eb",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: 18,
-    fontWeight: 600,
-    transition: "background 0.2s",
-  };
-
   return (
-    <div style={container}>
-      <h1 style={title}>{t("app.title")}</h1>
+    <Box
+      minH="calc(100vh - 70px)"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      p={4}
+    >
+      <Heading
+        fontSize={{ base: "4xl", md: "6xl" }}
+        fontWeight="bold"
+        mb={16}
+        color="blue.600"
+      >
+        {t("app.title")}
+      </Heading>
 
-      <div style={buttonContainer}>
-        <button
-          style={primaryButton}
-          onClick={handleTest}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#1d4ed8")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#2563eb")}
+      <VStack spacing={5} width="100%" maxW="400px">
+        <Tooltip
+          label={t("app.testNotAvailable")}
+          fontSize="md"
+          placement="top"
+          hasArrow
         >
-          {t("app.test")}
-        </button>
+          <Button
+            size="lg"
+            width="100%"
+            colorScheme="blue"
+            fontSize="lg"
+            py={6}
+            isDisabled
+            cursor="not-allowed"
+            opacity={0.6}
+            _hover={{}}
+          >
+            {t("app.test")}
+          </Button>
+        </Tooltip>
 
-        <button
-          style={primaryButton}
+        <Button
+          size="lg"
+          width="100%"
+          colorScheme="blue"
+          fontSize="lg"
+          py={6}
           onClick={handlePractice}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#1d4ed8")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#2563eb")}
+          _hover={{ bg: "blue.600" }}
         >
           {t("app.practice")}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </VStack>
+    </Box>
   );
 }
 
