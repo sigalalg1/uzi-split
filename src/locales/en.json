@@ -593,6 +593,16 @@
       "tipDescription": "Choose 'After Each Question' for learning mode, or 'At End' for test mode",
       "resetDefaults": "Reset to Defaults",
       "startPracticing": "Start Practicing"
+    },
+    "pwa": {
+      "installTitle": "Install Mathematiko",
+      "installDescription": "Install Mathematiko on your device for a better experience!",
+      "benefit1": "Work offline - practice anytime",
+      "benefit2": "Faster loading times",
+      "benefit3": "Home screen shortcut",
+      "benefit4": "Full screen app experience",
+      "install": "Install",
+      "notNow": "Not Now"
     }
   }
 }
