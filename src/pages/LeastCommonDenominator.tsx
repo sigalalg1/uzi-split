@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../context/UserContext";
+import * as userService from "../services/userService";
 import {
   Box,
   Button,
@@ -34,6 +36,14 @@ export default function LeastCommonDenominator() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const toast = useToast();
+  const { currentUser, isAuthenticated } = useUser();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -222,6 +232,28 @@ export default function LeastCommonDenominator() {
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
+
+      // Save test result to localStorage
+      if (currentUser) {
+        const finalScore = isAnswerCorrect ? score + 1 : score;
+        const finalTotal = totalQuestions + 1;
+        const testResult = {
+          testType: "leastCommonDenominator",
+          score: finalScore,
+          totalQuestions: finalTotal,
+          difficulty: difficulty!,
+          timeElapsed: elapsedTime,
+          completedAt: Date.now(),
+          percentage: Math.round((finalScore / finalTotal) * 100),
+        };
+
+        try {
+          userService.saveTestResult(currentUser, testResult);
+        } catch (error) {
+          console.error("Error saving test result:", error);
+        }
+      }
+
       setTimeout(() => {
         setShowFeedback(false);
       }, 2000);
