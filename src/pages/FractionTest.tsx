@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../context/UserContext";
+import * as userService from "../services/userService";
 import {
   Box,
   Button,
@@ -67,6 +69,14 @@ export default function FractionTest() {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation();
+  const { currentUser, isAuthenticated } = useUser();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
@@ -362,6 +372,26 @@ export default function FractionTest() {
     if (maxQuestions && totalQuestions + 1 >= maxQuestions) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
+      
+      // Save test result to localStorage
+      if (currentUser) {
+        const testResult = {
+          testType: "fraction",
+          score: isCorrect ? score + 1 : score,
+          totalQuestions: totalQuestions + 1,
+          difficulty: difficulty!,
+          timeElapsed: elapsedTime,
+          completedAt: Date.now(),
+          percentage: Math.round(((isCorrect ? score + 1 : score) / (totalQuestions + 1)) * 100),
+        };
+        
+        try {
+          userService.saveTestResult(currentUser, testResult);
+        } catch (error) {
+          console.error("Error saving test result:", error);
+        }
+      }
+      
       setTimeout(() => {
         setShowFeedback(false);
         setSelectedOptions(new Set());

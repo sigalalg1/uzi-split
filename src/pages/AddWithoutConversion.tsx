@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../context/UserContext";
+import * as userService from "../services/userService";
 import {
   Box,
   Button,
@@ -35,6 +37,14 @@ export default function AddWithoutConversion() {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation();
+  const { currentUser, isAuthenticated } = useUser();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -90,7 +100,7 @@ export default function AddWithoutConversion() {
     // Check for duplicates and regenerate if needed
     const questionKey = `${num1}+${num2}`;
     const questionKeyReverse = `${num2}+${num1}`;
-    
+
     if (existingQuestions.has(questionKey) || existingQuestions.has(questionKeyReverse)) {
       // Try up to 10 times to find a unique question
       let attempts = 0;
@@ -154,7 +164,7 @@ export default function AddWithoutConversion() {
       num2: exercise.num2,
       answer: exercise.answer,
     });
-    
+
     // Clear inputs for retry
     setUserAnswer("");
     setShowFeedback(false);
@@ -207,6 +217,28 @@ export default function AddWithoutConversion() {
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
+
+      // Save test result to localStorage
+      if (currentUser) {
+        const finalScore = isAnswerCorrect ? score + 1 : score;
+        const finalTotal = totalQuestions + 1;
+        const testResult = {
+          testType: "addition",
+          score: finalScore,
+          totalQuestions: finalTotal,
+          difficulty: difficulty!,
+          timeElapsed: elapsedTime,
+          completedAt: Date.now(),
+          percentage: Math.round((finalScore / finalTotal) * 100),
+        };
+
+        try {
+          userService.saveTestResult(currentUser, testResult);
+        } catch (error) {
+          console.error("Error saving test result:", error);
+        }
+      }
+
       setTimeout(() => {
         setShowFeedback(false);
         setIsCorrect(null);
@@ -373,8 +405,8 @@ export default function AddWithoutConversion() {
 
           <HStack spacing={4} width="100%">
             <Button
-              onClick={() => { 
-                setMaxExercises(null); 
+              onClick={() => {
+                setMaxExercises(null);
                 setDifficulty(null);
                 setUserAnswer("");
                 setTempCount(null);
@@ -399,7 +431,7 @@ export default function AddWithoutConversion() {
           {/* Show completed exercises */}
           <Box width="100%">
             <Heading size="md" mb={4} color="gray.600">
-              Review Your Answers
+              {t("additionTest.reviewAnswers")}
             </Heading>
             <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
               {completedExercises.map((exercise) => (

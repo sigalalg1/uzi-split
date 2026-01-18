@@ -1,7 +1,9 @@
 import React from "react";
-import { Box, Button, Flex, Heading, HStack, Image, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, Image, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Text, Menu, MenuButton, MenuList, MenuItem, Avatar } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+import * as userService from "../services/userService";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -11,10 +13,21 @@ export default function Layout({ children }: LayoutProps) {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser, isAuthenticated, logout } = useUser();
+
+  const user = currentUser ? userService.getUser(currentUser) : null;
 
   const handleLogin = () => {
-    console.log("Login clicked");
-    // TODO: Implement login functionality
+    navigate("/login");
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const handleProfile = () => {
+    navigate("/profile");
   };
 
   const toggleLanguage = () => {
@@ -110,16 +123,53 @@ export default function Layout({ children }: LayoutProps) {
             </Heading>
           </HStack>
 
-          {/* Right Side: Login | Language | About */}
-          <HStack spacing={2} divider={<Text color="gray.300">|</Text>}>
-            <Button
-              onClick={handleLogin}
-              variant="ghost"
-              colorScheme="blue"
-              size="sm"
-            >
-              {i18n.language === "en" ? "Login" : "התחברות"}
-            </Button>
+          {/* Right Side: User Menu | Language */}
+          <HStack spacing={3} divider={<Text color="gray.300">|</Text>}>
+            {isAuthenticated && user ? (
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="ghost"
+                  colorScheme="blue"
+                  size="sm"
+                  leftIcon={
+                    <Avatar
+                      name={user.username}
+                      size="xs"
+                      bg="purple.500"
+                      color="white"
+                    >
+                      {user.avatar}
+                    </Avatar>
+                  }
+                >
+                  {user.username}
+                </MenuButton>
+                <MenuList>
+                  <MenuItem onClick={handleProfile}>
+                    {t("layout.profile")}
+                  </MenuItem>
+                  <MenuItem onClick={() => navigate("/history")}>
+                    {t("layout.history")}
+                  </MenuItem>
+                  <MenuItem onClick={() => navigate("/settings")}>
+                    {t("layout.settings")}
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    {t("layout.logout")}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Button
+                onClick={handleLogin}
+                variant="ghost"
+                colorScheme="blue"
+                size="sm"
+              >
+                {t("layout.login")}
+              </Button>
+            )}
 
             <Button
               onClick={toggleLanguage}
@@ -128,15 +178,6 @@ export default function Layout({ children }: LayoutProps) {
               size="sm"
             >
               {i18n.language === "en" ? "עברית" : "English"}
-            </Button>
-
-            <Button
-              onClick={() => console.log("About clicked")}
-              variant="ghost"
-              colorScheme="blue"
-              size="sm"
-            >
-              {i18n.language === "en" ? "About" : "אודות"}
             </Button>
           </HStack>
         </Flex>

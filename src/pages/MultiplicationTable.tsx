@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../context/UserContext";
+import { useSettings } from "../context/SettingsContext";
+import * as userService from "../services/userService";
 import {
   Box,
   Button,
@@ -35,6 +38,15 @@ export default function MultiplicationTable() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const toast = useToast();
+  const { currentUser, isAuthenticated } = useUser();
+  const { settings } = useSettings();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -84,7 +96,7 @@ export default function MultiplicationTable() {
     // Check for duplicates and regenerate if needed
     const questionKey = `${num1}×${num2}`;
     const questionKeyReverse = `${num2}×${num1}`;
-    
+
     if (existingQuestions.has(questionKey) || existingQuestions.has(questionKeyReverse)) {
       // Try up to 10 times to find a unique question
       let attempts = 0;
@@ -195,9 +207,31 @@ export default function MultiplicationTable() {
     if (maxExercises && totalQuestions + 1 >= maxExercises) {
       setIsTimerRunning(false);
       setIsGameComplete(true);
+
+      // Save test result to localStorage
+      if (currentUser) {
+        const finalScore = isCorrect ? score + 1 : score;
+        const finalTotal = totalQuestions + 1;
+        const testResult = {
+          testType: "multiplication",
+          score: finalScore,
+          totalQuestions: finalTotal,
+          difficulty: difficulty!,
+          timeElapsed: elapsedTime,
+          completedAt: Date.now(),
+          percentage: Math.round((finalScore / finalTotal) * 100),
+        };
+
+        try {
+          userService.saveTestResult(currentUser, testResult);
+        } catch (error) {
+          console.error("Error saving test result:", error);
+        }
+      }
+
       setTimeout(() => {
         setShowFeedback(false);
-      }, 2000);
+      }, settings.feedbackDelay);
     } else {
       setTimeout(() => {
         setShowFeedback(false);
@@ -210,7 +244,7 @@ export default function MultiplicationTable() {
           return newSet;
         });
         setCurrentExercise(nextExercise);
-      }, 1500);
+      }, settings.feedbackDelay);
     }
   };
 
