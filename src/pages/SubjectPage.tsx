@@ -46,46 +46,47 @@ export default function SubjectPage() {
   };
 
   return (
-    <Container maxW="container.xl" py={6}>
-      <VStack spacing={6} align="stretch">
+    <Container maxW="container.xl" py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch">
         {/* Compact Header with Back Button */}
-        <Flex justify="space-between" align="center" mb={2}>
+        <Flex justify="space-between" align="center" mb={2} flexWrap="wrap" gap={2}>
           {/* Back Button */}
           <Button
             onClick={() => navigate("/practice")}
             colorScheme={colorScheme}
             variant="ghost"
             leftIcon={<span>←</span>}
-            size="sm"
+            size={{ base: "xs", md: "sm" }}
           >
             {t("additionTest.back")}
           </Button>
 
           {/* Center: Icon and Title */}
-          <Flex align="center" gap={3} flex={1} justify="center">
-            <Text fontSize="5xl" role="img" aria-label={subjectData.id}>
+          <Flex align="center" gap={{ base: 2, md: 3 }} flex={1} justify="center" flexWrap="wrap">
+            <Text fontSize={{ base: "3xl", md: "5xl" }} role="img" aria-label={subjectData.id}>
               {subjectData.icon}
             </Text>
             <Heading
-              fontSize={{ base: "2xl", md: "3xl" }}
+              fontSize={{ base: "xl", sm: "2xl", md: "3xl" }}
               fontWeight="bold"
               color={`${colorScheme}.600`}
+              textAlign="center"
             >
               {t(subjectData.i18nKey)}
             </Heading>
-            <Badge colorScheme={colorScheme} fontSize="sm" px={2} py={1}>
+            <Badge colorScheme={colorScheme} fontSize={{ base: "xs", md: "sm" }} px={2} py={1}>
               {tests.length}
             </Badge>
           </Flex>
 
           {/* Right spacer to center the title */}
-          <Box width="80px" />
+          <Box width={{ base: "0", md: "80px" }} display={{ base: "none", md: "block" }} />
         </Flex>
 
         {/* Grid of Test Cards */}
         <SimpleGrid
           columns={{ base: 1, md: 2, lg: 3 }}
-          spacing={6}
+          spacing={{ base: 4, md: 6 }}
           dir="ltr"
         >
           {tests.map((test, index) => (
@@ -98,10 +99,10 @@ export default function SubjectPage() {
             >
               <Box
                 bg="white"
-                borderRadius="2xl"
+                borderRadius={{ base: "xl", md: "2xl" }}
                 borderWidth={3}
                 borderColor={`${colorScheme}.400`}
-                p={6}
+                p={{ base: 4, md: 6 }}
                 shadow="lg"
                 _hover={{
                   shadow: "2xl",
@@ -115,9 +116,9 @@ export default function SubjectPage() {
                 onClick={() => handleTestClick(test.url)}
               >
                 {/* Test Name */}
-                <VStack spacing={4} flex={1} justify="center">
+                <VStack spacing={{ base: 3, md: 4 }} flex={1} justify="center">
                   <Heading
-                    size="md"
+                    size={{ base: "sm", md: "md" }}
                     color={`${colorScheme}.700`}
                     textAlign="center"
                   >
@@ -125,13 +126,13 @@ export default function SubjectPage() {
                   </Heading>
 
                   {/* Difficulty Badge */}
-                  <Badge colorScheme={colorScheme} fontSize="sm">
+                  <Badge colorScheme={colorScheme} fontSize={{ base: "xs", md: "sm" }}>
                     {test.config.difficultyLevels.max - test.config.difficultyLevels.min + 1} {t("practicePage.difficultyLevels")}
                   </Badge>
 
                   {/* Operation Badge - Only show for mathematical symbols */}
                   {["+", "-", "×", "÷", "=", "mixed", "lcd", "position"].includes(test.config.operation) && (
-                    <Text fontSize="4xl" color={`${colorScheme}.500`}>
+                    <Text fontSize={{ base: "3xl", md: "4xl" }} color={`${colorScheme}.500`}>
                       {test.config.operation}
                     </Text>
                   )}
@@ -141,7 +142,7 @@ export default function SubjectPage() {
                 <Button
                   mt={4}
                   colorScheme={colorScheme}
-                  size="md"
+                  size={{ base: "sm", md: "md" }}
                   width="100%"
                   onClick={(e) => {
                     e.stopPropagation();

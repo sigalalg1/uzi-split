@@ -105,33 +105,34 @@ export default function Layout({ children }: LayoutProps) {
         <Flex
           justify="space-between"
           align="center"
-          px={6}
-          py={4}
+          px={{ base: 3, md: 6 }}
+          py={{ base: 2, md: 4 }}
         >
           {/* Left Side: Logo and Title */}
-          <HStack spacing={3} cursor="pointer" onClick={() => navigate("/")} _hover={{ opacity: 0.8 }}>
+          <HStack spacing={{ base: 2, md: 3 }} cursor="pointer" onClick={() => navigate("/")} _hover={{ opacity: 0.8 }}>
             <Image
               src="/logo.png"
               alt="Logo"
-              height="60px"
+              height={{ base: "40px", md: "60px" }}
             />
             <Heading
-              size="lg"
+              size={{ base: "md", md: "lg" }}
               color="blue.600"
+              display={{ base: "none", sm: "block" }}
             >
               {t("app.title")}
             </Heading>
           </HStack>
 
           {/* Right Side: User Menu | Language */}
-          <HStack spacing={3} divider={<Text color="gray.300">|</Text>}>
+          <HStack spacing={{ base: 2, md: 3 }} divider={<Text color="gray.300" display={{ base: "none", sm: "block" }}>|</Text>}>
             {isAuthenticated && user ? (
               <Menu>
                 <MenuButton
                   as={Button}
                   variant="ghost"
                   colorScheme="blue"
-                  size="sm"
+                  size={{ base: "xs", md: "sm" }}
                   leftIcon={
                     <Avatar
                       name={user.username}
@@ -143,7 +144,7 @@ export default function Layout({ children }: LayoutProps) {
                     </Avatar>
                   }
                 >
-                  {user.username}
+                  <Text display={{ base: "none", sm: "inline" }}>{user.username}</Text>
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={handleProfile}>
@@ -165,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
                 onClick={handleLogin}
                 variant="ghost"
                 colorScheme="blue"
-                size="sm"
+                size={{ base: "xs", md: "sm" }}
               >
                 {t("layout.login")}
               </Button>
@@ -175,9 +176,10 @@ export default function Layout({ children }: LayoutProps) {
               onClick={toggleLanguage}
               variant="ghost"
               colorScheme="blue"
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
+              minW={{ base: "60px", md: "auto" }}
             >
-              {i18n.language === "en" ? "עברית" : "English"}
+              {i18n.language === "en" ? "עב" : "EN"}
             </Button>
           </HStack>
         </Flex>
@@ -185,13 +187,14 @@ export default function Layout({ children }: LayoutProps) {
         {/* Breadcrumb Navigation */}
         {!isHomePage && (
           <Box
-            px={6}
+            px={{ base: 3, md: 6 }}
             py={2}
             bg="gray.50"
             borderTopWidth={1}
             borderColor="gray.200"
+            overflowX="auto"
           >
-            <Breadcrumb separator="›" fontSize="sm">
+            <Breadcrumb separator="›" fontSize={{ base: "xs", md: "sm" }} whiteSpace="nowrap">
               {breadcrumbs.map((crumb, index) => (
                 <BreadcrumbItem key={crumb.path} isCurrentPage={index === breadcrumbs.length - 1}>
                   <BreadcrumbLink
@@ -211,7 +214,7 @@ export default function Layout({ children }: LayoutProps) {
       </Box>
 
       {/* Main Content with padding for fixed header */}
-      <Box pt={isHomePage ? "90px" : "140px"}>{children}</Box>
+      <Box pt={isHomePage ? { base: "70px", md: "90px" } : { base: "110px", md: "140px" }}>{children}</Box>
     </Box>
   );
 }

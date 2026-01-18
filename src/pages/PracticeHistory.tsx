@@ -199,20 +199,21 @@ export default function PracticeHistory() {
   }
 
   return (
-    <Container maxW="container.xl" py={6}>
-      <VStack spacing={6} align="stretch">
+    <Container maxW="container.xl" py={{ base: 4, md: 6 }} px={{ base: 4, md: 6 }}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch">
         {/* Header */}
-        <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-          <HStack spacing={4}>
+        <Flex justify="space-between" align="center" flexWrap="wrap" gap={{ base: 2, md: 4 }}>
+          <HStack spacing={{ base: 2, md: 4 }}>
             <Button
               leftIcon={<ArrowBackIcon />}
               onClick={() => navigate('/profile')}
               variant="ghost"
               colorScheme="purple"
+              size={{ base: "sm", md: "md" }}
             >
               {t('history.back')}
             </Button>
-            <Heading size="lg" color="purple.600">
+            <Heading size={{ base: "md", md: "lg" }} color="purple.600">
               {t('history.title')}
             </Heading>
           </HStack>
@@ -223,9 +224,10 @@ export default function PracticeHistory() {
               onClick={onOpen}
               colorScheme="red"
               variant="outline"
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
             >
-              {t('history.clearHistory')}
+              <Text display={{ base: "none", sm: "inline" }}>{t('history.clearHistory')}</Text>
+              <Text display={{ base: "inline", sm: "none" }}>Clear</Text>
             </Button>
           )}
         </Flex>
@@ -233,19 +235,19 @@ export default function PracticeHistory() {
         {/* Overall Statistics */}
         <Box
           bg={bgColor}
-          p={6}
+          p={{ base: 4, md: 6 }}
           borderRadius="lg"
           shadow="md"
           borderWidth={1}
           borderColor={borderColor}
         >
-          <Heading size="md" mb={4} color="gray.700">
+          <Heading size={{ base: "sm", md: "md" }} mb={4} color="gray.700">
             {t('history.overallStats')}
           </Heading>
           <SimpleGrid columns={[1, 2, 4]} spacing={4}>
             <Stat>
-              <StatLabel>{t('history.totalTests')}</StatLabel>
-              <StatNumber color="purple.600">{stats.totalTests}</StatNumber>
+              <StatLabel fontSize={{ base: "xs", md: "sm" }}>{t('history.totalTests')}</StatLabel>
+              <StatNumber color="purple.600" fontSize={{ base: "xl", md: "2xl" }}>{stats.totalTests}</StatNumber>
             </Stat>
             <Stat>
               <StatLabel>{t('history.averageScore')}</StatLabel>
@@ -364,14 +366,14 @@ export default function PracticeHistory() {
         {sortedResults.length === 0 ? (
           <Box
             bg={bgColor}
-            p={12}
+            p={{ base: 6, md: 12 }}
             borderRadius="lg"
             shadow="md"
             textAlign="center"
             borderWidth={1}
             borderColor={borderColor}
           >
-            <Text fontSize="xl" color="gray.500" mb={4}>
+            <Text fontSize={{ base: "md", md: "xl" }} color="gray.500" mb={4}>
               {filterType === 'all'
                 ? t('history.noTests')
                 : t('history.noTestsForType', { type: getTestTypeLabel(filterType) })
@@ -380,7 +382,7 @@ export default function PracticeHistory() {
             <Button
               onClick={() => navigate('/practice')}
               colorScheme="purple"
-              size="lg"
+              size={{ base: "md", md: "lg" }}
             >
               {t('history.startPracticing')}
             </Button>
@@ -394,17 +396,17 @@ export default function PracticeHistory() {
             borderWidth={1}
             borderColor={borderColor}
           >
-            <Table variant="simple">
+            <Table variant="simple" size={{ base: "sm", md: "md" }}>
               <Thead bg="purple.50">
                 <Tr>
-                  <Th>{t('history.dateTime')}</Th>
-                  <Th>{t('history.testType')}</Th>
-                  <Th>{t('history.difficulty')}</Th>
-                  <Th isNumeric>{t('history.questions')}</Th>
-                  <Th isNumeric>{t('history.score')}</Th>
-                  <Th isNumeric>{t('history.accuracy')}</Th>
-                  <Th isNumeric>{t('history.time')}</Th>
-                  <Th>{t('history.performance')}</Th>
+                  <Th fontSize={{ base: "xs", md: "sm" }}>{t('history.dateTime')}</Th>
+                  <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: "none", md: "table-cell" }}>{t('history.testType')}</Th>
+                  <Th fontSize={{ base: "xs", md: "sm" }}>{t('history.difficulty')}</Th>
+                  <Th isNumeric fontSize={{ base: "xs", md: "sm" }} display={{ base: "none", sm: "table-cell" }}>{t('history.questions')}</Th>
+                  <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>{t('history.score')}</Th>
+                  <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>{t('history.accuracy')}</Th>
+                  <Th isNumeric fontSize={{ base: "xs", md: "sm" }} display={{ base: "none", lg: "table-cell" }}>{t('history.time')}</Th>
+                  <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: "none", lg: "table-cell" }}>{t('history.performance')}</Th>
                 </Tr>
               </Thead>
               <Tbody>

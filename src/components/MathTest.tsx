@@ -25,6 +25,7 @@ import {
   CompletedExercise,
   Exercise,
   NumberExercise,
+  OrderOfOperationsExercise,
   CompareNumbersExercise,
   SequenceExercise,
   PlaceValueExercise,
@@ -254,10 +255,10 @@ export default function MathTest({ testConfig }: MathTestProps) {
     // Compare Numbers Exercise (check before general num1/num2)
     if ("comparison" in currentExercise && "num1" in currentExercise && "num2" in currentExercise) {
       const compareEx = currentExercise as CompareNumbersExercise;
-      const questionText = compareEx.comparison === "greater" 
+      const questionText = compareEx.comparison === "greater"
         ? t("practicePage.naturalNumbers.whichNumberGreater")
         : t("practicePage.naturalNumbers.whichNumberSmaller");
-      
+
       const handleNumberClick = (selectedNumber: number) => {
         if (showFeedback) return; // Don't allow clicking during feedback
         setUserAnswer(selectedNumber.toString());
@@ -347,7 +348,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
           }
         }, 100);
       };
-      
+
       return (
         <VStack spacing={8}>
           <Text fontSize="3xl" fontWeight="bold" color="teal.600">
@@ -361,7 +362,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
               size="lg"
               height="auto"
               padding="2rem"
-              _hover={{ 
+              _hover={{
                 bg: showFeedback ? "transparent" : "blue.50",
                 transform: showFeedback ? "none" : "scale(1.1)",
               }}
@@ -369,8 +370,8 @@ export default function MathTest({ testConfig }: MathTestProps) {
                 bg: "blue.100",
               }}
               cursor={showFeedback ? "not-allowed" : "pointer"}
-              bg={userAnswer === compareEx.num1.toString() && showFeedback 
-                ? isCorrect ? "green.100" : "red.100" 
+              bg={userAnswer === compareEx.num1.toString() && showFeedback
+                ? isCorrect ? "green.100" : "red.100"
                 : "transparent"}
             >
               <MotionBox
@@ -380,9 +381,9 @@ export default function MathTest({ testConfig }: MathTestProps) {
                 <Text fontSize="9xl" color="blue.500">{compareEx.num1}</Text>
               </MotionBox>
             </Button>
-            
+
             <Text color="gray.400" fontSize="6xl">{t("practicePage.naturalNumbers.vs")}</Text>
-            
+
             <Button
               onClick={() => handleNumberClick(compareEx.num2)}
               disabled={showFeedback}
@@ -390,7 +391,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
               size="lg"
               height="auto"
               padding="2rem"
-              _hover={{ 
+              _hover={{
                 bg: showFeedback ? "transparent" : "purple.50",
                 transform: showFeedback ? "none" : "scale(1.1)",
               }}
@@ -398,8 +399,8 @@ export default function MathTest({ testConfig }: MathTestProps) {
                 bg: "purple.100",
               }}
               cursor={showFeedback ? "not-allowed" : "pointer"}
-              bg={userAnswer === compareEx.num2.toString() && showFeedback 
-                ? isCorrect ? "green.100" : "red.100" 
+              bg={userAnswer === compareEx.num2.toString() && showFeedback
+                ? isCorrect ? "green.100" : "red.100"
                 : "transparent"}
             >
               <MotionBox
@@ -463,7 +464,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
       const placeEx = currentExercise as PlaceValueExercise;
       const placeKey = placeEx.place;
       const placeName = t(`practicePage.naturalNumbers.${placeKey}`);
-      
+
       return (
         <VStack spacing={8}>
           <Text fontSize="3xl" fontWeight="bold" color="teal.600">
@@ -546,7 +547,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
     if ("num1" in currentExercise && "num2" in currentExercise) {
       const numEx = currentExercise as NumberExercise;
       return (
-        <HStack spacing={8} fontSize="8xl" fontWeight="bold">
+        <HStack spacing={{ base: 3, md: 8 }} fontSize={{ base: "4xl", sm: "6xl", md: "8xl" }} fontWeight="bold" flexWrap="wrap" justify="center">
           <MotionBox
             animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
             transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
@@ -570,10 +571,10 @@ export default function MathTest({ testConfig }: MathTestProps) {
             onChange={(e) => setUserAnswer(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="?"
-            fontSize="8xl"
+            fontSize={{ base: "4xl", sm: "6xl", md: "8xl" }}
             fontWeight="bold"
             textAlign="center"
-            width="300px"
+            width={{ base: "120px", sm: "180px", md: "300px" }}
             height="auto"
             padding="0.5rem"
             autoFocus
@@ -590,10 +591,46 @@ export default function MathTest({ testConfig }: MathTestProps) {
       );
     }
 
+    if ("expression" in currentExercise) {
+      const orderEx = currentExercise as OrderOfOperationsExercise;
+      return (
+        <VStack spacing={6}>
+          <Text fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }} fontWeight="bold" color="blue.500">
+            {orderEx.expression}
+          </Text>
+          <HStack spacing={{ base: 2, md: 4 }} fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }}>
+            <Text color="gray.600">=</Text>
+            <Input
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="?"
+              fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }}
+              fontWeight="bold"
+              textAlign="center"
+              width={{ base: "120px", sm: "180px", md: "300px" }}
+              height="auto"
+              padding="0.5rem"
+              autoFocus
+              type="number"
+              borderWidth={3}
+              borderColor="blue.400"
+              _focus={{
+                borderColor: "blue.500",
+                boxShadow: "0 0 0 3px rgba(251, 146, 60, 0.3)",
+              }}
+              disabled={showFeedback}
+            />
+          </HStack>
+        </VStack>
+      );
+    }
+
+
     // Add more exercise type renderers as needed
     return (
       <VStack spacing={6}>
-        <Text fontSize="4xl" fontWeight="bold" color="blue.500">
+        <Text fontSize={{ base: "2xl", sm: "3xl", md: "4xl" }} fontWeight="bold" color="blue.500">
           {JSON.stringify(currentExercise)}
         </Text>
         <Input
@@ -601,10 +638,10 @@ export default function MathTest({ testConfig }: MathTestProps) {
           onChange={(e) => setUserAnswer(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="?"
-          fontSize="4xl"
+          fontSize={{ base: "2xl", sm: "3xl", md: "4xl" }}
           fontWeight="bold"
           textAlign="center"
-          width="300px"
+          width={{ base: "120px", sm: "180px", md: "300px" }}
           height="auto"
           padding="0.5rem"
           autoFocus
@@ -619,13 +656,22 @@ export default function MathTest({ testConfig }: MathTestProps) {
   // Exercise count and difficulty selection screen
   if (!maxExercises || !difficulty) {
     return (
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} dir="ltr">
-          <HStack justify="center" spacing={4}>
-            <Heading textAlign="center" color={`${testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}.600`} size="lg">
+      <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 6 }}>
+        <VStack spacing={{ base: 6, md: 8 }} dir="ltr">
+          <HStack justify="center" spacing={{ base: 2, md: 4 }} flexWrap="wrap">
+            <Heading
+              textAlign="center"
+              color={`${testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}.600`}
+              size={{ base: "md", md: "lg" }}
+            >
               {t(testConfig.i18nKey)}
             </Heading>
-            <Badge colorScheme={testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"} fontSize="md" px={3} py={1}>
+            <Badge
+              colorScheme={testConfig.config.testType === "addition" ? "blue" : testConfig.config.testType === "subtraction" ? "pink" : "red"}
+              fontSize={{ base: "sm", md: "md" }}
+              px={3}
+              py={1}
+            >
               {testConfig.config.testType}
             </Badge>
           </HStack>
@@ -633,20 +679,20 @@ export default function MathTest({ testConfig }: MathTestProps) {
           {/* Question Count Selection */}
           {!tempCount && (
             <>
-              <Text fontSize="xl" color="gray.600" textAlign="center" fontWeight="bold">
+              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold">
                 {t("practicePage.selectQuestions")}
               </Text>
 
-              <HStack spacing={4} flexWrap="wrap" justify="center">
+              <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
                 {[5, 10, 15, 20, 25].map((count) => (
                   <Button
                     key={count}
                     onClick={() => setTempCount(count)}
                     colorScheme="blue"
-                    size="lg"
-                    fontSize="2xl"
-                    width="100px"
-                    height="100px"
+                    size={{ base: "md", md: "lg" }}
+                    fontSize={{ base: "xl", md: "2xl" }}
+                    width={{ base: "70px", md: "100px" }}
+                    height={{ base: "70px", md: "100px" }}
                     _hover={{ transform: "scale(1.05)" }}
                     transition="all 0.2s"
                   >
@@ -660,11 +706,11 @@ export default function MathTest({ testConfig }: MathTestProps) {
           {/* Difficulty Level Selection */}
           {tempCount && (
             <>
-              <Text fontSize="xl" color="gray.600" textAlign="center" fontWeight="bold">
+              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold">
                 {t("practicePage.selectDifficulty")}
               </Text>
 
-              <HStack spacing={4} flexWrap="wrap" justify="center">
+              <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
                 {Array.from(
                   { length: testConfig.config.difficultyLevels.max - testConfig.config.difficultyLevels.min + 1 },
                   (_, i) => testConfig.config.difficultyLevels.min + i
@@ -674,10 +720,10 @@ export default function MathTest({ testConfig }: MathTestProps) {
                     onClick={() => startGame(tempCount, level)}
                     colorScheme="blue"
                     variant="outline"
-                    size="lg"
-                    fontSize="3xl"
-                    width="100px"
-                    height="100px"
+                    size={{ base: "md", md: "lg" }}
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    width={{ base: "70px", md: "100px" }}
+                    height={{ base: "70px", md: "100px" }}
                     _hover={{ transform: "scale(1.05)", bg: "blue.50" }}
                     transition="all 0.2s"
                   >
@@ -686,7 +732,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
                 ))}
               </HStack>
 
-              <Button onClick={() => setTempCount(null)} colorScheme="gray" variant="ghost">
+              <Button onClick={() => setTempCount(null)} colorScheme="gray" variant="ghost" size={{ base: "sm", md: "md" }}>
                 ← {t("additionTest.back")}
               </Button>
             </>
@@ -700,14 +746,14 @@ export default function MathTest({ testConfig }: MathTestProps) {
   if (isGameComplete) {
     const percentage = Math.round((score / totalQuestions) * 100);
     return (
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} dir="ltr">
+      <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 6 }}>
+        <VStack spacing={{ base: 6, md: 8 }} dir="ltr">
           <MotionBox
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", duration: 0.5 }}
           >
-            <Heading size="2xl" textAlign="center">
+            <Heading size={{ base: "xl", md: "2xl" }} textAlign="center">
               {percentage === 100
                 ? t("additionTest.perfectScore")
                 : percentage >= 80
@@ -720,21 +766,21 @@ export default function MathTest({ testConfig }: MathTestProps) {
 
           <Box
             bg="white"
-            p={8}
-            borderRadius="2xl"
+            p={{ base: 4, md: 8 }}
+            borderRadius={{ base: "xl", md: "2xl" }}
             shadow="2xl"
             borderWidth={3}
             borderColor="blue.400"
             width="100%"
           >
-            <VStack spacing={6}>
-              <Heading size="lg" color="gray.700">
+            <VStack spacing={{ base: 4, md: 6 }}>
+              <Heading size={{ base: "md", md: "lg" }} color="gray.700">
                 {t("additionTest.testComplete")}
               </Heading>
 
-              <HStack spacing={8} fontSize="3xl" fontWeight="bold">
+              <HStack spacing={{ base: 4, md: 8 }} fontSize={{ base: "xl", sm: "2xl", md: "3xl" }} fontWeight="bold" flexWrap="wrap" justify="center">
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">
+                  <Text color="gray.500" fontSize={{ base: "sm", md: "lg" }}>
                     {t("additionTest.score")}
                   </Text>
                   <Text color="blue.600">
@@ -742,13 +788,13 @@ export default function MathTest({ testConfig }: MathTestProps) {
                   </Text>
                 </VStack>
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">
+                  <Text color="gray.500" fontSize={{ base: "sm", md: "lg" }}>
                     {t("additionTest.accuracy")}
                   </Text>
                   <Text color="green.600">{percentage}%</Text>
                 </VStack>
                 <VStack>
-                  <Text color="gray.500" fontSize="lg">
+                  <Text color="gray.500" fontSize={{ base: "sm", md: "lg" }}>
                     {t("additionTest.time")}
                   </Text>
                   <Text color="purple.600">{formatTime(elapsedTime)}</Text>
@@ -758,14 +804,14 @@ export default function MathTest({ testConfig }: MathTestProps) {
               <Progress
                 value={percentage}
                 colorScheme={percentage >= 80 ? "green" : percentage >= 60 ? "yellow" : "red"}
-                size="lg"
+                size={{ base: "md", md: "lg" }}
                 borderRadius="full"
                 width="100%"
               />
             </VStack>
           </Box>
 
-          <HStack spacing={4} width="100%">
+          <HStack spacing={{ base: 2, md: 4 }} width="100%" flexWrap="wrap">
             <Button
               onClick={() => {
                 setMaxExercises(null);
@@ -774,8 +820,9 @@ export default function MathTest({ testConfig }: MathTestProps) {
                 setTempCount(null);
               }}
               colorScheme="blue"
-              size="lg"
+              size={{ base: "md", md: "lg" }}
               flex={1}
+              minW={{ base: "140px", md: "auto" }}
             >
               {t("additionTest.startNew")}
             </Button>
@@ -783,8 +830,9 @@ export default function MathTest({ testConfig }: MathTestProps) {
               onClick={() => navigate("/practice")}
               colorScheme="gray"
               variant="outline"
-              size="lg"
+              size={{ base: "md", md: "lg" }}
               flex={1}
+              minW={{ base: "140px", md: "auto" }}
             >
               {t("additionTest.backToTests")}
             </Button>
@@ -793,21 +841,21 @@ export default function MathTest({ testConfig }: MathTestProps) {
           {/* Show completed exercises */}
           {completedExercises.length > 0 && (
             <Box width="100%">
-              <Heading size="md" mb={4} color="gray.600">
+              <Heading size={{ base: "sm", md: "md" }} mb={4} color="gray.600">
                 {t("additionTest.reviewAnswers")}
               </Heading>
-              <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
+              <VStack spacing={2} align="stretch" maxH={{ base: "300px", md: "400px" }} overflowY="auto">
                 {completedExercises.map((exercise) => (
                   <Box
                     key={exercise.timestamp}
-                    p={4}
+                    p={{ base: 3, md: 4 }}
                     borderRadius="lg"
                     bg={exercise.isCorrect ? "green.50" : "red.50"}
                     borderWidth={2}
                     borderColor={exercise.isCorrect ? "green.200" : "red.200"}
                   >
-                    <Flex justify="space-between" align="center">
-                      <Text fontSize="lg" fontWeight="bold">
+                    <Flex justify="space-between" align="center" flexWrap="wrap">
+                      <Text fontSize={{ base: "sm", md: "lg" }} fontWeight="bold">
                         {exercise.isCorrect ? "✓" : "✗"} {t("practicePage.yourAnswer")}: {exercise.userAnswer}
                         {!exercise.isCorrect && ` (${t("additionTest.correct")}: ${(exercise as Exercise).answer})`}
                       </Text>
@@ -815,46 +863,47 @@ export default function MathTest({ testConfig }: MathTestProps) {
                   </Box>
                 ))}
               </VStack>
-            </Box>
-          )}
-        </VStack>
-      </Container>
+            </Box >
+          )
+          }
+        </VStack >
+      </Container >
     );
   }
 
   if (!currentExercise) return null;
 
   return (
-    <Container maxW="container.xl" py={8}>
-      <VStack spacing={6} align="stretch" dir="ltr">
+    <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch" dir="ltr">
         {/* Header */}
         <Flex justify="flex-end" align="center" wrap="wrap" gap={2}>
-          <HStack spacing={4}>
-            <Badge colorScheme="blue" fontSize="lg" px={4} py={2} borderRadius="full">
+          <HStack spacing={{ base: 2, md: 4 }}>
+            <Badge colorScheme="blue" fontSize={{ base: "sm", md: "lg" }} px={{ base: 2, md: 4 }} py={{ base: 1, md: 2 }} borderRadius="full">
               ⏱️ {formatTime(elapsedTime)}
             </Badge>
-            <Badge colorScheme="purple" fontSize="lg" px={4} py={2} borderRadius="full">
-              🔥 {t("additionTest.streak")}: {streak}
+            <Badge colorScheme="purple" fontSize={{ base: "sm", md: "lg" }} px={{ base: 2, md: 4 }} py={{ base: 1, md: 2 }} borderRadius="full">
+              🔥 {streak}
             </Badge>
           </HStack>
         </Flex>
 
-        <HStack justify="center" spacing={4}>
-          <Heading textAlign="center" color="blue.600" size="lg">
+        <HStack justify="center" spacing={{ base: 2, md: 4 }} flexWrap="wrap">
+          <Heading textAlign="center" color="blue.600" size={{ base: "md", md: "lg" }}>
             {t(testConfig.i18nKey)}
           </Heading>
-          <Badge colorScheme="blue" fontSize="md" px={3} py={1}>
+          <Badge colorScheme="blue" fontSize={{ base: "sm", md: "md" }} px={3} py={1}>
             {t("practicePage.difficultyLevel")} {difficulty}
           </Badge>
         </HStack>
 
         {/* Progress */}
         <Box>
-          <Flex justify="space-between" mb={2}>
-            <Text fontWeight="bold">
+          <Flex justify="space-between" mb={2} flexWrap="wrap" gap={2}>
+            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
               {t("additionTest.progress")}: {totalQuestions}/{maxExercises}
             </Text>
-            <Text fontWeight="bold">
+            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
               {t("additionTest.score")}: {score}/{totalQuestions} (
               {totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
             </Text>
@@ -862,7 +911,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
           <Progress
             value={maxExercises ? (totalQuestions / maxExercises) * 100 : 0}
             colorScheme="blue"
-            size="lg"
+            size={{ base: "md", md: "lg" }}
             borderRadius="full"
           />
         </Box>
@@ -878,26 +927,27 @@ export default function MathTest({ testConfig }: MathTestProps) {
             bg={showFeedback ? (isCorrect ? "green.50" : "red.50") : "white"}
             borderWidth={3}
             borderColor={showFeedback ? (isCorrect ? "green.400" : "red.400") : "blue.400"}
-            borderRadius="2xl"
-            p={12}
+            borderRadius={{ base: "xl", md: "2xl" }}
+            p={{ base: 6, md: 12 }}
             shadow="2xl"
             transition="all 0.3s"
             dir="ltr"
           >
-            <VStack spacing={8} dir="ltr">
+            <VStack spacing={{ base: 6, md: 8 }} dir="ltr">
               {renderExercise()}
 
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
                 colorScheme="blue"
-                size="lg"
-                fontSize="2xl"
-                px={12}
-                py={8}
+                size={{ base: "md", md: "lg" }}
+                fontSize={{ base: "lg", md: "2xl" }}
+                px={{ base: 8, md: 12 }}
+                py={{ base: 6, md: 8 }}
                 isDisabled={userAnswer === "" || showFeedback}
                 _hover={{ transform: "scale(1.05)" }}
                 transition="all 0.2s"
+                width={{ base: "100%", md: "auto" }}
               >
                 {t("additionTest.checkAnswer")}
               </Button>
@@ -910,7 +960,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Text textAlign="center" fontSize="xl" color="gray.500">
+          <Text textAlign="center" fontSize={{ base: "md", md: "xl" }} color="gray.500">
             {streak >= 5
               ? t("additionTest.onFire")
               : streak >= 3

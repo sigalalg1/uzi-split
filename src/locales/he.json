@@ -611,6 +611,16 @@
       "tipDescription": "בחר 'אחרי כל שאלה' למצב למידה, או 'בסוף המבחן' למצב מבחן",
       "resetDefaults": "אפס לברירות מחדל",
       "startPracticing": "התחל להתאמן"
+    },
+    "pwa": {
+      "installTitle": "התקן את Mathematiko",
+      "installDescription": "!התקן את Mathematiko במכשיר שלך לחוויה טובה יותר",
+      "benefit1": "עבוד ללא אינטרנט - תרגל בכל זמן",
+      "benefit2": "טעינה מהירה יותר",
+      "benefit3": "קיצור דרך במסך הבית",
+      "benefit4": "חוויית אפליקציה במסך מלא",
+      "install": "התקן",
+      "notNow": "לא עכשיו"
     }
   }
 }
