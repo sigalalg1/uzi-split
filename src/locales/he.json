@@ -4,7 +4,8 @@
       "title": "חשבוניקו",
       "login": "התחברות",
       "test": "מבחן",
-      "practice": "תרגול"
+      "practice": "תרגול",
+      "testNotAvailable": "מצב מבחן עדיין לא זמין"
     },
     "common": {
       "numerator": "מונה",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/UserContext";
 import * as userService from "../services/userService";
@@ -41,7 +41,6 @@ export default function MathTest({ testConfig }: MathTestProps) {
   const toast = useToast();
   const { t } = useTranslation();
   const { currentUser, isAuthenticated } = useUser();
-  const params = useParams();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -150,15 +149,6 @@ export default function MathTest({ testConfig }: MathTestProps) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleHistoryClick = (exercise: CompletedExercise) => {
-    // Extract only the Exercise properties (remove userAnswer, isCorrect, timestamp)
-    const { userAnswer: _ua, isCorrect: _ic, timestamp: _ts, ...exerciseData } = exercise;
-    setCurrentExercise(exerciseData as Exercise);
-    setUserAnswer("");
-    setShowFeedback(false);
-    setIsCorrect(null);
   };
 
   const handleSubmit = () => {
