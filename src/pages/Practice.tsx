@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { testData } from "../data/tests";
+import { getSubjectsWithTests } from "../config/configHelper";
 import {
   Box,
   Container,
@@ -16,31 +16,13 @@ import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
-// Subject icons/emojis
-const subjectIcons: Record<string, string> = {
-  addition: "➕",
-  subtraction: "➖",
-  multiplication: "✖️",
-  "order-of-operations": "🔢",
-  fractions: "½",
-  "number-line": "📏",
-};
-
-const subjectColors: Record<string, string> = {
-  addition: "blue",
-  subtraction: "pink",
-  multiplication: "red",
-  "order-of-operations": "purple",
-  fractions: "green",
-  "number-line": "purple",
-};
-
 export default function Practice() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const subjectsWithTests = getSubjectsWithTests();
 
-  const handleTestClick = (url: string) => {
-    navigate(url);
+  const handleSubjectClick = (subjectId: string) => {
+    navigate(`/practice/${subjectId}`);
   };
 
   return (
@@ -66,14 +48,15 @@ export default function Practice() {
           columns={{ base: 1, md: 2, lg: 3 }}
           spacing={6}
           mt={4}
+          dir="ltr"
         >
-          {testData.map((subjectData, index) => {
-            const colorScheme = subjectColors[subjectData.subject] || "blue";
-            const icon = subjectIcons[subjectData.subject] || "📚";
+          {subjectsWithTests.map((subjectData, index) => {
+            const colorScheme = subjectData.color;
+            const icon = subjectData.icon;
 
             return (
               <MotionBox
-                key={subjectData.subject}
+                key={subjectData.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -89,11 +72,13 @@ export default function Practice() {
                   _hover={{
                     shadow: "2xl",
                     borderColor: `${colorScheme}.500`,
+                    cursor: "pointer",
                   }}
                   transition="all 0.3s"
                   height="100%"
                   display="flex"
                   flexDirection="column"
+                  onClick={() => handleSubjectClick(subjectData.id)}
                 >
                   {/* Icon/Logo Area */}
                   <Flex
@@ -105,7 +90,7 @@ export default function Practice() {
                     p={4}
                     height="100px"
                   >
-                    <Text fontSize="6xl" role="img" aria-label={subjectData.subject}>
+                    <Text fontSize="6xl" role="img" aria-label={subjectData.id}>
                       {icon}
                     </Text>
                   </Flex>
@@ -117,36 +102,27 @@ export default function Practice() {
                     textAlign="center"
                     mb={4}
                   >
-                    {t(subjectData.subjectKey)}
+                    {t(subjectData.i18nKey)}
                   </Heading>
 
-                  {/* Practice Links */}
-                  <VStack spacing={2} flex={1} align="stretch">
-                    {subjectData.tests.map((test) => (
-                      <Button
-                        key={test.name}
-                        onClick={() => handleTestClick(test.url)}
-                        colorScheme={colorScheme}
-                        variant="outline"
-                        size="sm"
-                        justifyContent="flex-start"
-                        px={4}
-                        py={2}
-                        height="auto"
-                        whiteSpace="normal"
-                        textAlign="left"
-                        _hover={{
-                          bg: `${colorScheme}.50`,
-                          transform: "translateX(4px)",
-                        }}
-                        transition="all 0.2s"
-                      >
-                        <Text fontSize="sm" fontWeight="medium">
-                          {t(test.text)}
-                        </Text>
-                      </Button>
-                    ))}
-                  </VStack>
+                  {/* View Tests Button */}
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubjectClick(subjectData.id);
+                    }}
+                    colorScheme={colorScheme}
+                    variant="solid"
+                    size="md"
+                    width="100%"
+                    _hover={{
+                      transform: "scale(1.05)",
+                    }}
+                    transition="all 0.2s"
+                    mt="auto"
+                  >
+                    {t("practicePage.viewTests")}
+                  </Button>
 
                   {/* Practice Count Badge */}
                   <Text
