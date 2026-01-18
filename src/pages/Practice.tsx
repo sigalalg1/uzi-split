@@ -1,166 +1,168 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { testData } from "../data/tests";
-import { TestSubject } from "../types/test";
+import {
+  Box,
+  Container,
+  Heading,
+  SimpleGrid,
+  VStack,
+  Text,
+  Button,
+  Flex,
+} from "@chakra-ui/react";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
+
+// Subject icons/emojis
+const subjectIcons: Record<string, string> = {
+  addition: "➕",
+  subtraction: "➖",
+  multiplication: "✖️",
+  "order-of-operations": "🔢",
+  fractions: "½",
+  "number-line": "📏",
+};
+
+const subjectColors: Record<string, string> = {
+  addition: "blue",
+  subtraction: "pink",
+  multiplication: "red",
+  "order-of-operations": "purple",
+  fractions: "green",
+  "number-line": "purple",
+};
 
 export default function Practice() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(
-    new Set(["addition", "multiplication", "order-of-operations", "fractions"])
-  );
-
-  const toggleSubject = (subject: string) => {
-    setExpandedSubjects((prev) => {
-      const next = new Set(prev);
-      if (next.has(subject)) {
-        next.delete(subject);
-      } else {
-        next.add(subject);
-      }
-      return next;
-    });
-  };
 
   const handleTestClick = (url: string) => {
     navigate(url);
   };
 
-  // Styles
-  const container: React.CSSProperties = {
-    minHeight: "calc(100vh - 70px)",
-    padding: 16,
-  };
-
-  const header: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: 30,
-    gap: 20,
-  };
-
-  const title: React.CSSProperties = {
-    fontSize: 32,
-    fontWeight: 700,
-    color: "#2563eb",
-    margin: 0,
-  };
-
-  const treeContainer: React.CSSProperties = {
-    maxWidth: 800,
-    margin: "0 auto",
-  };
-
-  const levelContainer: React.CSSProperties = {
-    marginBottom: 20,
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    overflow: "hidden",
-  };
-
-  const levelHeader: React.CSSProperties = {
-    padding: "16px 20px",
-    background: "#f3f4f6",
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontWeight: 600,
-    fontSize: 18,
-    userSelect: "none",
-  };
-
-  const testList: React.CSSProperties = {
-    padding: "10px 0",
-    background: "#fff",
-  };
-
-  const testItem: React.CSSProperties = {
-    padding: "12px 40px",
-    cursor: "pointer",
-    borderBottom: "1px solid #f3f4f6",
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-  };
-
-  const testIcon: React.CSSProperties = {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    background: "#2563eb",
-  };
-
-  const testText: React.CSSProperties = {
-    fontSize: 16,
-    color: "#374151",
-  };
-
-  const arrow: React.CSSProperties = {
-    fontSize: 14,
-    transition: "transform 0.2s",
-  };
-
   return (
-    <div style={container}>
-      <div style={header}>
-        <h1 style={title}>{t("practicePage.title")}</h1>
-      </div>
+    <Container maxW="container.xl" py={8}>
+      <VStack spacing={8} align="stretch">
+        {/* Header */}
+        <Flex justify="center" align="center" direction="column" gap={2}>
+          <Heading
+            fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
+            fontWeight="bold"
+            color="blue.600"
+            textAlign="center"
+          >
+            {t("practicePage.title")}
+          </Heading>
+          <Text fontSize="lg" color="gray.600" textAlign="center">
+            {t("practicePage.subtitle")}
+          </Text>
+        </Flex>
 
-      <div style={treeContainer}>
-        {testData.map((subjectData: TestSubject) => {
-          const isExpanded = expandedSubjects.has(subjectData.subject);
+        {/* Grid of Subject Cards */}
+        <SimpleGrid
+          columns={{ base: 1, md: 2, lg: 3 }}
+          spacing={6}
+          mt={4}
+        >
+          {testData.map((subjectData, index) => {
+            const colorScheme = subjectColors[subjectData.subject] || "blue";
+            const icon = subjectIcons[subjectData.subject] || "📚";
 
-          return (
-            <div key={subjectData.subject} style={levelContainer}>
-              <div
-                style={levelHeader}
-                onClick={() => toggleSubject(subjectData.subject)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#e5e7eb")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#f3f4f6")
-                }
+            return (
+              <MotionBox
+                key={subjectData.subject}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
               >
-                <span>{t(subjectData.subjectKey)}</span>
-                <span
-                  style={{
-                    ...arrow,
-                    transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                <Box
+                  bg="white"
+                  borderRadius="2xl"
+                  borderWidth={3}
+                  borderColor={`${colorScheme}.400`}
+                  p={6}
+                  shadow="lg"
+                  _hover={{
+                    shadow: "2xl",
+                    borderColor: `${colorScheme}.500`,
                   }}
+                  transition="all 0.3s"
+                  height="100%"
+                  display="flex"
+                  flexDirection="column"
                 >
-                  ▶
-                </span>
-              </div>
+                  {/* Icon/Logo Area */}
+                  <Flex
+                    justify="center"
+                    align="center"
+                    mb={4}
+                    bg={`${colorScheme}.50`}
+                    borderRadius="xl"
+                    p={4}
+                    height="100px"
+                  >
+                    <Text fontSize="6xl" role="img" aria-label={subjectData.subject}>
+                      {icon}
+                    </Text>
+                  </Flex>
 
-              {isExpanded && (
-                <div style={testList}>
-                  {subjectData.tests.map((test) => (
-                    <div
-                      key={test.name}
-                      style={testItem}
-                      onClick={() => handleTestClick(test.url)}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#f9fafb")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "#fff")
-                      }
-                    >
-                      <div style={testIcon}></div>
-                      <span style={testText}>{t(test.text)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+                  {/* Subject Title */}
+                  <Heading
+                    size="md"
+                    color={`${colorScheme}.700`}
+                    textAlign="center"
+                    mb={4}
+                  >
+                    {t(subjectData.subjectKey)}
+                  </Heading>
+
+                  {/* Practice Links */}
+                  <VStack spacing={2} flex={1} align="stretch">
+                    {subjectData.tests.map((test) => (
+                      <Button
+                        key={test.name}
+                        onClick={() => handleTestClick(test.url)}
+                        colorScheme={colorScheme}
+                        variant="outline"
+                        size="sm"
+                        justifyContent="flex-start"
+                        px={4}
+                        py={2}
+                        height="auto"
+                        whiteSpace="normal"
+                        textAlign="left"
+                        _hover={{
+                          bg: `${colorScheme}.50`,
+                          transform: "translateX(4px)",
+                        }}
+                        transition="all 0.2s"
+                      >
+                        <Text fontSize="sm" fontWeight="medium">
+                          {t(test.text)}
+                        </Text>
+                      </Button>
+                    ))}
+                  </VStack>
+
+                  {/* Practice Count Badge */}
+                  <Text
+                    mt={4}
+                    fontSize="xs"
+                    color="gray.500"
+                    textAlign="center"
+                  >
+                    {subjectData.tests.length} {t("practicePage.exercisesLabel")}
+                  </Text>
+                </Box>
+              </MotionBox>
+            );
+          })}
+        </SimpleGrid>
+      </VStack>
+    </Container>
   );
 }
-
-

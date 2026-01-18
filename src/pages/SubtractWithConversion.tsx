@@ -2,21 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/UserContext";
-import { useSettings } from "../context/SettingsContext";
 import * as userService from "../services/userService";
 import {
   Box,
   Button,
   Container,
-  Flex,
   Heading,
-  HStack,
-  VStack,
   Text,
-  Badge,
-  Progress,
+  VStack,
+  HStack,
   Input,
+  Progress,
   useToast,
+  Badge,
+  Flex,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
@@ -34,14 +33,12 @@ type CompletedExercise = Exercise & {
   timestamp: number;
 };
 
-export default function MultiplicationTable() {
+export default function SubtractWithConversion() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const toast = useToast();
+  const { t } = useTranslation();
   const { currentUser, isAuthenticated } = useUser();
-  const { settings } = useSettings();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -64,57 +61,66 @@ export default function MultiplicationTable() {
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
-  const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
-    let num1: number, num2: number;
-
-    switch (level) {
-      case 1: // Very easy: 1-5 tables
-        num1 = Math.floor(Math.random() * 5) + 1;
-        num2 = Math.floor(Math.random() * 10) + 1;
-        break;
-      case 2: // Easy: 1-10 tables
-        num1 = Math.floor(Math.random() * 10) + 1;
-        num2 = Math.floor(Math.random() * 10) + 1;
-        break;
-      case 3: // Medium: 6-12 tables (start from 6)
-        num1 = Math.floor(Math.random() * 7) + 6;
-        num2 = Math.floor(Math.random() * 7) + 6;
-        break;
-      case 4: // Hard: 8-15 tables (start from 8)
-        num1 = Math.floor(Math.random() * 8) + 8;
-        num2 = Math.floor(Math.random() * 8) + 8;
-        break;
-      case 5: // Very hard: 11-20 tables (start from 11)
-        num1 = Math.floor(Math.random() * 10) + 11;
-        num2 = Math.floor(Math.random() * 10) + 11;
-        break;
-      default:
-        num1 = Math.floor(Math.random() * 10) + 1;
-        num2 = Math.floor(Math.random() * 10) + 1;
-    }
-
-    // Check for duplicates and regenerate if needed
-    const questionKey = `${num1}×${num2}`;
-    const questionKeyReverse = `${num2}×${num1}`;
-
-    if (existingQuestions.has(questionKey) || existingQuestions.has(questionKeyReverse)) {
-      // Try up to 10 times to find a unique question
-      let attempts = 0;
-      while (attempts < 10) {
-        const newExercise = generateExercise(level, existingQuestions);
-        const newKey = `${newExercise.num1}×${newExercise.num2}`;
-        const newKeyReverse = `${newExercise.num2}×${newExercise.num1}`;
-        if (!existingQuestions.has(newKey) && !existingQuestions.has(newKeyReverse)) {
-          return newExercise;
-        }
-        attempts++;
+  // Helper function to check if subtraction requires borrowing
+  const requiresBorrowing = (num1: number, num2: number): boolean => {
+    const num1Str = num1.toString();
+    const num2Str = num2.toString().padStart(num1Str.length, '0');
+    
+    for (let i = num1Str.length - 1; i >= 0; i--) {
+      const digit1 = parseInt(num1Str[i]);
+      const digit2 = parseInt(num2Str[i]);
+      if (digit1 < digit2) {
+        return true;
       }
     }
+    return false;
+  };
 
+  const generateExercise = (level: number, existingQuestions: Set<string> = new Set()): Exercise => {
+    let num1, num2;
+    let attempts = 0;
+    const maxAttempts = 50;
+
+    do {
+      switch (level) {
+        case 1: // Easy: 11-20 minus single digit with borrowing
+          num1 = Math.floor(Math.random() * 10) + 11;
+          num2 = Math.floor(Math.random() * 9) + 1;
+          break;
+        case 2: // Medium: 20-50 minus single/teen with borrowing
+          num1 = Math.floor(Math.random() * 31) + 20;
+          num2 = Math.floor(Math.random() * 15) + 5;
+          break;
+        case 3: // Medium-Hard: 30-70 minus teens with borrowing
+          num1 = Math.floor(Math.random() * 41) + 30;
+          num2 = Math.floor(Math.random() * 20) + 10;
+          break;
+        case 4: // Hard: 50-99 minus 10-30 with borrowing
+          num1 = Math.floor(Math.random() * 50) + 50;
+          num2 = Math.floor(Math.random() * 21) + 10;
+          break;
+        case 5: // Very Hard: 60-99 minus 20-50 with borrowing
+          num1 = Math.floor(Math.random() * 40) + 60;
+          num2 = Math.floor(Math.random() * 31) + 20;
+          break;
+        default:
+          num1 = Math.floor(Math.random() * 31) + 20;
+          num2 = Math.floor(Math.random() * 15) + 5;
+      }
+
+      // Ensure num2 is less than num1 and borrowing is required
+      if (num2 >= num1) {
+        num2 = Math.floor(num1 / 2);
+      }
+
+      attempts++;
+    } while ((!requiresBorrowing(num1, num2) || existingQuestions.has(`${num1}-${num2}`)) && attempts < maxAttempts);
+
+    // If we couldn't find a unique question with borrowing, just return what we have
     return {
       num1,
       num2,
-      answer: num1 * num2,
+      answer: num1 - num2,
     };
   };
 
@@ -124,7 +130,7 @@ export default function MultiplicationTable() {
     const newUsedQuestions = new Set<string>();
     setUsedQuestions(newUsedQuestions);
     const firstExercise = generateExercise(level, newUsedQuestions);
-    newUsedQuestions.add(`${firstExercise.num1}×${firstExercise.num2}`);
+    newUsedQuestions.add(`${firstExercise.num1}-${firstExercise.num2}`);
     setUsedQuestions(newUsedQuestions);
     setCurrentExercise(firstExercise);
     setIsTimerRunning(true);
@@ -185,7 +191,7 @@ export default function MultiplicationTable() {
       setStreak(streak + 1);
 
       toast({
-        title: streak >= 2 ? `🎉 ${streak + 1} ${t("multiplicationTable.inARow")}` : `✅ ${t("multiplicationTable.correct")}`,
+        title: streak >= 2 ? `🎉 ${streak + 1} ${t("subtractWithConversion.inARow")}` : `✅ ${t("subtractWithConversion.correct")}`,
         status: "success",
         duration: 1500,
         isClosable: true,
@@ -195,8 +201,8 @@ export default function MultiplicationTable() {
       setStreak(0);
 
       toast({
-        title: `❌ ${t("multiplicationTable.notQuite")}`,
-        description: `${t("multiplicationTable.answerIs")} ${currentExercise.answer}`,
+        title: `❌ ${t("subtractWithConversion.notQuite")}`,
+        description: `${t("subtractWithConversion.answerIs")} ${currentExercise.answer}`,
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -208,12 +214,11 @@ export default function MultiplicationTable() {
       setIsTimerRunning(false);
       setIsGameComplete(true);
 
-      // Save test result to localStorage
       if (currentUser) {
-        const finalScore = isCorrect ? score + 1 : score;
+        const finalScore = isAnswerCorrect ? score + 1 : score;
         const finalTotal = totalQuestions + 1;
         const testResult = {
-          testType: "multiplication",
+          testType: "subtract-with-conversion",
           score: finalScore,
           totalQuestions: finalTotal,
           difficulty: difficulty!,
@@ -231,7 +236,9 @@ export default function MultiplicationTable() {
 
       setTimeout(() => {
         setShowFeedback(false);
-      }, settings.feedbackDelay);
+        setIsCorrect(null);
+        setUserAnswer("");
+      }, 1500);
     } else {
       setTimeout(() => {
         setShowFeedback(false);
@@ -240,11 +247,11 @@ export default function MultiplicationTable() {
         const nextExercise = generateExercise(difficulty!, usedQuestions);
         setUsedQuestions(prev => {
           const newSet = new Set(prev);
-          newSet.add(`${nextExercise.num1}×${nextExercise.num2}`);
+          newSet.add(`${nextExercise.num1}-${nextExercise.num2}`);
           return newSet;
         });
         setCurrentExercise(nextExercise);
-      }, settings.feedbackDelay);
+      }, 1500);
     }
   };
 
@@ -254,21 +261,19 @@ export default function MultiplicationTable() {
     }
   };
 
-  // Exercise count and difficulty selection screen
   if (!maxExercises || !difficulty) {
     return (
       <Container maxW="container.md" py={8}>
         <VStack spacing={8}>
           <HStack justify="center" spacing={4}>
-            <Heading textAlign="center" color="red.600" size="lg">
-              {t("multiplicationTable.title")}
+            <Heading textAlign="center" color="pink.600" size="lg">
+              {t("subtractWithConversion.title")}
             </Heading>
-            <Badge colorScheme="red" fontSize="md" px={3} py={1}>
-              {t("practicePage.subjects.multiplication")}
+            <Badge colorScheme="pink" fontSize="md" px={3} py={1}>
+              {t("practicePage.subjects.subtraction")}
             </Badge>
           </HStack>
 
-          {/* Question Count Selection */}
           {!tempCount && (
             <>
               <Text fontSize="xl" color="gray.600" textAlign="center" fontWeight="bold">
@@ -280,7 +285,7 @@ export default function MultiplicationTable() {
                   <Button
                     key={count}
                     onClick={() => setTempCount(count)}
-                    colorScheme="red"
+                    colorScheme="pink"
                     size="lg"
                     fontSize="2xl"
                     width="100px"
@@ -295,7 +300,6 @@ export default function MultiplicationTable() {
             </>
           )}
 
-          {/* Difficulty Level Selection */}
           {tempCount && (
             <>
               <Text fontSize="xl" color="gray.600" textAlign="center" fontWeight="bold">
@@ -307,13 +311,13 @@ export default function MultiplicationTable() {
                   <Button
                     key={level}
                     onClick={() => startGame(tempCount, level)}
-                    colorScheme="red"
+                    colorScheme="pink"
                     variant="outline"
                     size="lg"
                     fontSize="3xl"
                     width="100px"
                     height="100px"
-                    _hover={{ transform: "scale(1.05)", bg: "red.50" }}
+                    _hover={{ transform: "scale(1.05)", bg: "pink.50" }}
                     transition="all 0.2s"
                   >
                     {level}
@@ -326,7 +330,7 @@ export default function MultiplicationTable() {
                 colorScheme="gray"
                 variant="ghost"
               >
-                ← {t("multiplicationTable.back")}
+                ← {t("subtractWithConversion.back")}
               </Button>
             </>
           )}
@@ -335,11 +339,10 @@ export default function MultiplicationTable() {
     );
   }
 
-  // Game complete screen
   if (isGameComplete) {
     const percentage = Math.round((score / totalQuestions) * 100);
     return (
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.md" py={8}>
         <VStack spacing={8}>
           <MotionBox
             initial={{ scale: 0 }}
@@ -347,13 +350,7 @@ export default function MultiplicationTable() {
             transition={{ type: "spring", duration: 0.5 }}
           >
             <Heading size="2xl" textAlign="center">
-              {percentage === 100
-                ? t("multiplicationTable.perfectScore")
-                : percentage >= 80
-                  ? t("multiplicationTable.greatJob")
-                  : percentage >= 60
-                    ? t("multiplicationTable.wellDone")
-                    : t("multiplicationTable.keepPracticing")}
+              {percentage === 100 ? t("subtractWithConversion.perfectScore") : percentage >= 80 ? t("subtractWithConversion.greatJob") : percentage >= 60 ? t("subtractWithConversion.wellDone") : t("subtractWithConversion.keepPracticing")}
             </Heading>
           </MotionBox>
 
@@ -363,46 +360,32 @@ export default function MultiplicationTable() {
             borderRadius="2xl"
             shadow="2xl"
             borderWidth={3}
-            borderColor="red.400"
+            borderColor="pink.400"
             width="100%"
           >
             <VStack spacing={6}>
               <Heading size="lg" color="gray.700">
-                {t("multiplicationTable.testComplete")}
+                {t("subtractWithConversion.testComplete")}
               </Heading>
 
-              <HStack spacing={12} fontSize="xl" flexWrap="wrap" justify="center">
+              <HStack spacing={8} fontSize="3xl" fontWeight="bold">
                 <VStack>
-                  <Text fontWeight="bold" color="gray.600">
-                    {t("multiplicationTable.yourScore")}
-                  </Text>
-                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
-                    {score}/{totalQuestions}
-                  </Text>
+                  <Text color="gray.500" fontSize="lg">{t("subtractWithConversion.score")}</Text>
+                  <Text color="pink.600">{score}/{totalQuestions}</Text>
                 </VStack>
-
                 <VStack>
-                  <Text fontWeight="bold" color="gray.600">
-                    {t("multiplicationTable.accuracy")}
-                  </Text>
-                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
-                    {percentage}%
-                  </Text>
+                  <Text color="gray.500" fontSize="lg">{t("subtractWithConversion.accuracy")}</Text>
+                  <Text color="pink.600">{percentage}%</Text>
                 </VStack>
-
                 <VStack>
-                  <Text fontWeight="bold" color="gray.600">
-                    {t("multiplicationTable.time")}
-                  </Text>
-                  <Text fontSize="4xl" fontWeight="bold" color="red.600">
-                    {formatTime(elapsedTime)}
-                  </Text>
+                  <Text color="gray.500" fontSize="lg">{t("subtractWithConversion.time")}</Text>
+                  <Text color="purple.600">{formatTime(elapsedTime)}</Text>
                 </VStack>
               </HStack>
 
               <Progress
                 value={percentage}
-                colorScheme="red"
+                colorScheme={percentage >= 80 ? "green" : percentage >= 60 ? "yellow" : "red"}
                 size="lg"
                 borderRadius="full"
                 width="100%"
@@ -418,11 +401,11 @@ export default function MultiplicationTable() {
                 setUserAnswer("");
                 setTempCount(null);
               }}
-              colorScheme="red"
+              colorScheme="pink"
               size="lg"
               flex={1}
             >
-              {t("multiplicationTable.startNew")}
+              {t("subtractWithConversion.startNew")}
             </Button>
             <Button
               onClick={() => navigate("/practice")}
@@ -431,9 +414,50 @@ export default function MultiplicationTable() {
               size="lg"
               flex={1}
             >
-              {t("multiplicationTable.backToTests")}
+              {t("subtractWithConversion.backToTests")}
             </Button>
           </HStack>
+
+          <Box width="100%">
+            <Heading size="md" mb={4} color="gray.600">
+              {t("subtractWithConversion.reviewAnswers")}
+            </Heading>
+            <VStack spacing={2} align="stretch" maxH="400px" overflowY="auto">
+              {completedExercises.map((exercise) => (
+                <Box
+                  key={exercise.timestamp}
+                  p={4}
+                  borderRadius="lg"
+                  bg={exercise.isCorrect ? "green.50" : "red.50"}
+                  borderWidth={2}
+                  borderColor={exercise.isCorrect ? "green.200" : "red.200"}
+                >
+                  <Flex justify="space-between" align="center">
+                    <HStack spacing={4} fontSize="2xl" fontWeight="bold">
+                      <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
+                        {exercise.isCorrect ? "✓" : "✗"}
+                      </Text>
+                      <Text color="pink.500">{exercise.num1}</Text>
+                      <Text color="gray.500">−</Text>
+                      <Text color="rose.500">{exercise.num2}</Text>
+                      <Text color="gray.500">=</Text>
+                      <Text
+                        color={exercise.isCorrect ? "green.600" : "red.600"}
+                        textDecoration={exercise.isCorrect ? "none" : "line-through"}
+                      >
+                        {exercise.userAnswer}
+                      </Text>
+                      {!exercise.isCorrect && (
+                        <Text color="green.600" fontSize="lg">
+                          (correct: {exercise.answer})
+                        </Text>
+                      )}
+                    </HStack>
+                  </Flex>
+                </Box>
+              ))}
+            </VStack>
+          </Box>
         </VStack>
       </Container>
     );
@@ -444,51 +468,47 @@ export default function MultiplicationTable() {
   return (
     <Container maxW="container.md" py={8}>
       <VStack spacing={6} align="stretch">
-        {/* Header */}
         <Flex justify="flex-end" align="center" wrap="wrap" gap={2}>
           <HStack spacing={4}>
             <Badge colorScheme="blue" fontSize="lg" px={4} py={2} borderRadius="full">
               ⏱️ {formatTime(elapsedTime)}
             </Badge>
             <Badge colorScheme="purple" fontSize="lg" px={4} py={2} borderRadius="full">
-              🔥 {t("multiplicationTable.streak")}: {streak}
+              🔥 {t("subtractWithConversion.streak")}: {streak}
             </Badge>
           </HStack>
         </Flex>
 
         <HStack justify="center" spacing={4}>
-          <Heading textAlign="center" color="red.600" size="lg">
-            {t("multiplicationTable.title")}
+          <Heading textAlign="center" color="pink.600" size="lg">
+            {t("subtractWithConversion.title")}
           </Heading>
-          <Badge colorScheme="red" fontSize="md" px={3} py={1}>
+          <Badge colorScheme="pink" fontSize="md" px={3} py={1}>
             {t("practicePage.difficultyLevel")} {difficulty}
           </Badge>
         </HStack>
 
-        {/* Progress */}
         <Box>
           <Flex justify="space-between" mb={2}>
             <Text fontWeight="bold">
-              {t("multiplicationTable.progress")}: {totalQuestions}/{maxExercises}
+              {t("subtractWithConversion.progress")}: {totalQuestions}/{maxExercises}
             </Text>
             <Text fontWeight="bold">
-              {t("multiplicationTable.score")}: {score}/{totalQuestions} (
-              {totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
+              {t("subtractWithConversion.score")}: {score}/{totalQuestions} ({totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%)
             </Text>
           </Flex>
           <Progress
             value={maxExercises ? (totalQuestions / maxExercises) * 100 : 0}
-            colorScheme="red"
+            colorScheme="pink"
             size="lg"
             borderRadius="full"
           />
         </Box>
 
-        {/* Exercise Card */}
         <MotionBox
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          key={`${currentExercise.num1}-${currentExercise.num2}-${totalQuestions}`}
+          key={`${currentExercise.num1}-${currentExercise.num2}`}
           transition={{ duration: 0.3 }}
         >
           <Box
@@ -505,48 +525,48 @@ export default function MultiplicationTable() {
                 ? isCorrect
                   ? "green.400"
                   : "red.400"
-                : "red.400"
+                : "pink.400"
             }
             borderRadius="2xl"
             p={12}
             shadow="2xl"
             transition="all 0.3s"
           >
-            <VStack spacing={6}>
-              {/* Multiplication Problem */}
-              <HStack spacing={6} fontSize="6xl" fontWeight="bold" flexWrap="wrap" justify="center">
+            <VStack spacing={8}>
+              <HStack spacing={8} fontSize="8xl" fontWeight="bold">
                 <MotionBox
                   animate={{
-                    scale: [1, 1.05, 1],
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 5, -5, 0],
                   }}
                   transition={{
-                    duration: 1,
+                    duration: 0.5,
                     repeat: Infinity,
-                    repeatDelay: 2,
+                    repeatDelay: 3,
                   }}
                 >
-                  <Text color="red.500">{currentExercise.num1}</Text>
+                  <Text color="pink.500">{currentExercise.num1}</Text>
                 </MotionBox>
 
-                <Text color="gray.600">×</Text>
+                <Text color="gray.600">−</Text>
 
                 <MotionBox
                   animate={{
-                    scale: [1, 1.05, 1],
+                    scale: [1, 1.2, 1],
+                    rotate: [0, -5, 5, 0],
                   }}
                   transition={{
-                    duration: 1,
+                    duration: 0.5,
                     repeat: Infinity,
-                    repeatDelay: 2,
-                    delay: 0.5,
+                    repeatDelay: 3,
+                    delay: 0.2,
                   }}
                 >
-                  <Text color="red.500">{currentExercise.num2}</Text>
+                  <Text color="rose.500">{currentExercise.num2}</Text>
                 </MotionBox>
 
                 <Text color="gray.600">=</Text>
 
-                {/* Answer Input */}
                 <Input
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
@@ -562,34 +582,32 @@ export default function MultiplicationTable() {
                   autoFocus
                   type="number"
                   borderWidth={3}
-                  borderColor="red.400"
+                  borderColor="pink.400"
                   _focus={{
-                    borderColor: "red.500",
-                    boxShadow: "0 0 0 3px rgba(245, 101, 101, 0.3)",
+                    borderColor: "pink.500",
+                    boxShadow: "0 0 0 3px rgba(236, 72, 153, 0.3)",
                   }}
                   disabled={showFeedback}
                 />
               </HStack>
 
-              {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                colorScheme="red"
+                colorScheme="pink"
                 size="lg"
-                fontSize="xl"
-                px={8}
-                py={6}
+                fontSize="2xl"
+                px={12}
+                py={8}
                 isDisabled={userAnswer === "" || showFeedback}
                 _hover={{ transform: "scale(1.05)" }}
                 transition="all 0.2s"
               >
-                {t("multiplicationTable.checkAnswer")}
+                {t("subtractWithConversion.checkAnswer")}
               </Button>
             </VStack>
           </Box>
         </MotionBox>
 
-        {/* Encouragement Text */}
         <MotionBox
           animate={{
             opacity: [0.5, 1, 0.5],
@@ -601,21 +619,20 @@ export default function MultiplicationTable() {
         >
           <Text textAlign="center" fontSize="xl" color="gray.500">
             {streak >= 5
-              ? t("multiplicationTable.onFire")
+              ? t("subtractWithConversion.onFire")
               : streak >= 3
-                ? t("multiplicationTable.amazing")
-                : t("multiplicationTable.typeAnswer")}
+                ? t("subtractWithConversion.amazing")
+                : t("subtractWithConversion.typeAnswer")}
           </Text>
         </MotionBox>
 
-        {/* Completed Exercises History */}
         {completedExercises.length > 0 && (
           <Box mt={8}>
             <Heading size="md" mb={4} color="gray.600">
-              {t("multiplicationTable.completedExercises")}
+              {t("subtractWithConversion.completedExercises")}
             </Heading>
-            <VStack spacing={2} align="stretch" maxH="300px" overflowY="auto">
-              {completedExercises.map((exercise) => (
+            <VStack spacing={2} align="stretch">
+              {completedExercises.map((exercise, index) => (
                 <MotionBox
                   key={exercise.timestamp}
                   initial={{ opacity: 0, x: -20 }}
@@ -632,16 +649,16 @@ export default function MultiplicationTable() {
                     _hover={{ opacity: 1, transform: "scale(1.02)", cursor: "pointer" }}
                     transition="all 0.2s"
                     onClick={() => handleHistoryClick(exercise)}
-                    title={t("multiplicationTable.clickToRetry")}
+                    title={t("subtractWithConversion.clickToRetry")}
                   >
-                    <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
-                      <HStack spacing={3} fontSize="2xl" fontWeight="bold" flexWrap="wrap">
+                    <Flex justify="space-between" align="center">
+                      <HStack spacing={4} fontSize="2xl" fontWeight="bold">
                         <Text color={exercise.isCorrect ? "green.600" : "red.600"}>
                           {exercise.isCorrect ? "✓" : "✗"}
                         </Text>
-                        <Text color="red.500">{exercise.num1}</Text>
-                        <Text color="gray.500">×</Text>
-                        <Text color="red.500">{exercise.num2}</Text>
+                        <Text color="pink.500">{exercise.num1}</Text>
+                        <Text color="gray.500">−</Text>
+                        <Text color="rose.500">{exercise.num2}</Text>
                         <Text color="gray.500">=</Text>
                         <Text
                           color={exercise.isCorrect ? "green.600" : "red.600"}
@@ -669,4 +686,6 @@ export default function MultiplicationTable() {
     </Container>
   );
 }
+
+
 
