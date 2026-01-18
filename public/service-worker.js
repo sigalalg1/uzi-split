@@ -2,12 +2,11 @@ const CACHE_NAME = 'math-place-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/css/main.css',
-  '/static/js/main.js',
+  '/logo.png',
   '/logo192.png',
   '/logo512.png',
-  '/logo.png',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.ico'
 ];
 
 // Install service worker and cache resources
