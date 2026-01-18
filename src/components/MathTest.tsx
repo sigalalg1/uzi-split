@@ -440,6 +440,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
                     padding="0.5rem"
                     autoFocus
                     type="number"
+                    inputMode="numeric"
                     borderWidth={3}
                     borderColor="teal.400"
                     _focus={{
@@ -495,6 +496,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
               padding="0.5rem"
               autoFocus
               type="number"
+              inputMode="numeric"
               borderWidth={3}
               borderColor="teal.400"
               _focus={{
@@ -530,6 +532,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
               padding="0.5rem"
               autoFocus
               type="number"
+              inputMode="numeric"
               borderWidth={3}
               borderColor="blue.400"
               _focus={{
@@ -579,6 +582,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
             padding="0.5rem"
             autoFocus
             type="number"
+            inputMode="numeric"
             borderWidth={3}
             borderColor="blue.400"
             _focus={{
@@ -613,6 +617,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
               padding="0.5rem"
               autoFocus
               type="number"
+              inputMode="numeric"
               borderWidth={3}
               borderColor="blue.400"
               _focus={{
