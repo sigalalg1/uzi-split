@@ -32,7 +32,7 @@ export default function Login() {
   const toast = useToast();
   const { t } = useTranslation();
   const { login, createUser, deleteUser, getAllUsers } = useUser();
-  
+
   const [newUsername, setNewUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0]);
   const [showNewUser, setShowNewUser] = useState(false);
@@ -64,7 +64,7 @@ export default function Login() {
 
   const handleCreateUser = () => {
     const trimmedUsername = newUsername.trim();
-    
+
     if (!trimmedUsername) {
       toast({
         title: t('login.emptyUsername'),
@@ -151,7 +151,7 @@ export default function Login() {
               <Heading size="md" color="gray.700">
                 {t('login.selectUser')}
               </Heading>
-              
+
               <SimpleGrid columns={[2, 3]} spacing={4} w="100%">
                 {existingUsers.map((user) => (
                   <Box key={user.username} position="relative">
@@ -261,7 +261,7 @@ export default function Login() {
                   >
                     {t('login.start')}
                   </Button>
-                  
+
                   {existingUsers.length > 0 && (
                     <Button
                       onClick={() => {
