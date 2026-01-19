@@ -162,7 +162,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
     if (settings.defaultDifficulty !== null && tempDifficulty === null && !hasStarted) {
       setTempDifficulty(settings.defaultDifficulty);
     }
-  }, [settings.defaultTestCount, settings.defaultDifficulty, hasStarted]);
+  }, [settings.defaultTestCount, settings.defaultDifficulty, hasStarted, tempCount, tempDifficulty]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
