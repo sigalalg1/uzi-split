@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/UserContext";
+import { useSettings } from "../context/SettingsContext";
 import * as userService from "../services/userService";
 import {
   Box,
@@ -29,6 +30,7 @@ import {
   CompareNumbersExercise,
   SequenceExercise,
   PlaceValueExercise,
+  FractionExercise,
 } from "../config/types";
 
 const MotionBox = motion(Box);
@@ -42,6 +44,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
   const toast = useToast();
   const { t } = useTranslation();
   const { currentUser, isAuthenticated } = useUser();
+  const { settings } = useSettings();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -63,6 +66,8 @@ export default function MathTest({ testConfig }: MathTestProps) {
   const [maxExercises, setMaxExercises] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<number | null>(null);
   const [tempCount, setTempCount] = useState<number | null>(null);
+  const [tempDifficulty, setTempDifficulty] = useState<number | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [usedQuestions, setUsedQuestions] = useState<Set<string>>(new Set());
 
@@ -84,12 +89,15 @@ export default function MathTest({ testConfig }: MathTestProps) {
     return validatorFn(userAns, correctAns);
   };
 
-  const startGame = (count: number, level: number) => {
-    setMaxExercises(count);
-    setDifficulty(level);
+  const startGame = () => {
+    if (!tempCount || !tempDifficulty) return;
+    
+    setMaxExercises(tempCount);
+    setDifficulty(tempDifficulty);
+    setHasStarted(true);
     const newUsedQuestions = new Set<string>();
     setUsedQuestions(newUsedQuestions);
-    const firstExercise = generateExercise(level, newUsedQuestions);
+    const firstExercise = generateExercise(tempDifficulty, newUsedQuestions);
 
     // Add question key to used questions
     const questionKey = getQuestionKey(firstExercise);
@@ -145,6 +153,16 @@ export default function MathTest({ testConfig }: MathTestProps) {
     }
     return () => clearInterval(interval);
   }, [isTimerRunning]);
+
+  // Pre-populate with defaults from settings
+  useEffect(() => {
+    if (settings.defaultTestCount !== null && tempCount === null && !hasStarted) {
+      setTempCount(settings.defaultTestCount);
+    }
+    if (settings.defaultDifficulty !== null && tempDifficulty === null && !hasStarted) {
+      setTempDifficulty(settings.defaultDifficulty);
+    }
+  }, [settings.defaultTestCount, settings.defaultDifficulty, hasStarted]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -549,6 +567,13 @@ export default function MathTest({ testConfig }: MathTestProps) {
     // Standard Number Exercise (addition, subtraction, multiplication)
     if ("num1" in currentExercise && "num2" in currentExercise) {
       const numEx = currentExercise as NumberExercise;
+      const operation = testConfig.config.operation;
+
+      // Translate operation if it's a word (like "lcd")
+      const displayOperation = ["+", "-", "×", "÷", "="].includes(operation)
+        ? operation
+        : t(`common.${operation}`, operation);
+
       return (
         <HStack spacing={{ base: 3, md: 8 }} fontSize={{ base: "4xl", sm: "6xl", md: "8xl" }} fontWeight="bold" flexWrap="wrap" justify="center">
           <MotionBox
@@ -558,7 +583,9 @@ export default function MathTest({ testConfig }: MathTestProps) {
             <Text color="blue.500">{numEx.num1}</Text>
           </MotionBox>
 
-          <Text color="gray.600">{testConfig.config.operation}</Text>
+          <Text color="gray.600" fontSize={displayOperation.length > 2 ? "4xl" : "8xl"}>
+            {displayOperation}
+          </Text>
 
           <MotionBox
             animate={{ scale: [1, 1.2, 1], rotate: [0, -5, 5, 0] }}
@@ -595,6 +622,94 @@ export default function MathTest({ testConfig }: MathTestProps) {
       );
     }
 
+    // Fraction Exercise
+    if ("numerator1" in currentExercise && "denominator1" in currentExercise) {
+      const fractionEx = currentExercise as FractionExercise;
+      return (
+        <VStack spacing={8}>
+          <HStack spacing={8} fontSize={{ base: "4xl", sm: "5xl", md: "6xl" }} fontWeight="bold">
+            {/* First Fraction */}
+            <VStack spacing={1}>
+              <Text color="blue.500">{fractionEx.numerator1}</Text>
+              <Box width={{ base: "50px", md: "60px" }} height="4px" bg="gray.600" />
+              <Text color="blue.500">{fractionEx.denominator1}</Text>
+            </VStack>
+
+            {/* Operation */}
+            {fractionEx.operation && (
+              <Text color="gray.600" fontSize={{ base: "6xl", md: "8xl" }}>{fractionEx.operation}</Text>
+            )}
+
+            {/* Second Fraction */}
+            {fractionEx.numerator2 !== undefined && (
+              <VStack spacing={1}>
+                <Text color="purple.500">{fractionEx.numerator2}</Text>
+                <Box width={{ base: "50px", md: "60px" }} height="4px" bg="gray.600" />
+                <Text color="purple.500">{fractionEx.denominator2}</Text>
+              </VStack>
+            )}
+
+            {/* Equals */}
+            <Text color="gray.600" fontSize={{ base: "6xl", md: "8xl" }}>=</Text>
+
+            {/* Answer Input - Two separate inputs for numerator and denominator */}
+            <VStack spacing={1}>
+              <Input
+                value={userAnswer.split("/")[0] || ""}
+                onChange={(e) => {
+                  const denom = userAnswer.split("/")[1] || "";
+                  setUserAnswer(`${e.target.value}/${denom}`);
+                }}
+                placeholder="?"
+                fontSize={{ base: "4xl", sm: "5xl", md: "6xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                width={{ base: "100px", md: "150px" }}
+                height="auto"
+                padding="0.5rem"
+                type="number"
+                inputMode="numeric"
+                borderWidth={3}
+                borderColor="green.400"
+                _focus={{
+                  borderColor: "green.500",
+                  boxShadow: "0 0 0 3px rgba(72, 187, 120, 0.3)",
+                }}
+                disabled={showFeedback}
+              />
+              <Box width={{ base: "100px", md: "150px" }} height="4px" bg="gray.600" />
+              <Input
+                value={userAnswer.split("/")[1] || ""}
+                onChange={(e) => {
+                  const numer = userAnswer.split("/")[0] || "";
+                  setUserAnswer(`${numer}/${e.target.value}`);
+                }}
+                onKeyPress={handleKeyPress}
+                placeholder="?"
+                fontSize={{ base: "4xl", sm: "5xl", md: "6xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                width={{ base: "100px", md: "150px" }}
+                height="auto"
+                padding="0.5rem"
+                autoFocus
+                type="number"
+                inputMode="numeric"
+                borderWidth={3}
+                borderColor="green.400"
+                _focus={{
+                  borderColor: "green.500",
+                  boxShadow: "0 0 0 3px rgba(72, 187, 120, 0.3)",
+                }}
+                disabled={showFeedback}
+              />
+            </VStack>
+          </HStack>
+        </VStack>
+      );
+    }
+
+    // Order of Operations Exercise
     if ("expression" in currentExercise) {
       const orderEx = currentExercise as OrderOfOperationsExercise;
       return (
@@ -630,8 +745,6 @@ export default function MathTest({ testConfig }: MathTestProps) {
         </VStack>
       );
     }
-
-
     // Add more exercise type renderers as needed
     return (
       <VStack spacing={6}>
@@ -659,7 +772,7 @@ export default function MathTest({ testConfig }: MathTestProps) {
   };
 
   // Exercise count and difficulty selection screen
-  if (!maxExercises || !difficulty) {
+  if (!hasStarted) {
     return (
       <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 6 }}>
         <VStack spacing={{ base: 6, md: 8 }} dir="ltr">
@@ -682,65 +795,74 @@ export default function MathTest({ testConfig }: MathTestProps) {
           </HStack>
 
           {/* Question Count Selection */}
-          {!tempCount && (
-            <>
-              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold">
-                {t("practicePage.selectQuestions")}
-              </Text>
+          <Box>
+            <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold" mb={4}>
+              {t("practicePage.selectQuestions")}
+            </Text>
 
-              <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
-                {[5, 10, 15, 20, 25].map((count) => (
-                  <Button
-                    key={count}
-                    onClick={() => setTempCount(count)}
-                    colorScheme="blue"
-                    size={{ base: "md", md: "lg" }}
-                    fontSize={{ base: "xl", md: "2xl" }}
-                    width={{ base: "70px", md: "100px" }}
-                    height={{ base: "70px", md: "100px" }}
-                    _hover={{ transform: "scale(1.05)" }}
-                    transition="all 0.2s"
-                  >
-                    {count}
-                  </Button>
-                ))}
-              </HStack>
-            </>
-          )}
+            <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
+              {[5, 10, 15, 20, 25].map((count) => (
+                <Button
+                  key={count}
+                  onClick={() => setTempCount(count)}
+                  colorScheme={tempCount === count ? "blue" : "gray"}
+                  variant={tempCount === count ? "solid" : "outline"}
+                  size={{ base: "md", md: "lg" }}
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  width={{ base: "70px", md: "100px" }}
+                  height={{ base: "70px", md: "100px" }}
+                  _hover={{ transform: "scale(1.05)" }}
+                  transition="all 0.2s"
+                >
+                  {count}
+                </Button>
+              ))}
+            </HStack>
+          </Box>
 
           {/* Difficulty Level Selection */}
-          {tempCount && (
-            <>
-              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold">
-                {t("practicePage.selectDifficulty")}
-              </Text>
+          <Box>
+            <Text fontSize={{ base: "lg", md: "xl" }} color="gray.600" textAlign="center" fontWeight="bold" mb={4}>
+              {t("practicePage.selectDifficulty")}
+            </Text>
 
-              <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
-                {Array.from(
-                  { length: testConfig.config.difficultyLevels.max - testConfig.config.difficultyLevels.min + 1 },
-                  (_, i) => testConfig.config.difficultyLevels.min + i
-                ).map((level) => (
-                  <Button
-                    key={level}
-                    onClick={() => startGame(tempCount, level)}
-                    colorScheme="blue"
-                    variant="outline"
-                    size={{ base: "md", md: "lg" }}
-                    fontSize={{ base: "2xl", md: "3xl" }}
-                    width={{ base: "70px", md: "100px" }}
-                    height={{ base: "70px", md: "100px" }}
-                    _hover={{ transform: "scale(1.05)", bg: "blue.50" }}
-                    transition="all 0.2s"
-                  >
-                    {level}
-                  </Button>
-                ))}
-              </HStack>
+            <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap" justify="center">
+              {Array.from(
+                { length: testConfig.config.difficultyLevels.max - testConfig.config.difficultyLevels.min + 1 },
+                (_, i) => testConfig.config.difficultyLevels.min + i
+              ).map((level) => (
+                <Button
+                  key={level}
+                  onClick={() => setTempDifficulty(level)}
+                  colorScheme={tempDifficulty === level ? "blue" : "gray"}
+                  variant={tempDifficulty === level ? "solid" : "outline"}
+                  size={{ base: "md", md: "lg" }}
+                  fontSize={{ base: "2xl", md: "3xl" }}
+                  width={{ base: "70px", md: "100px" }}
+                  height={{ base: "70px", md: "100px" }}
+                  _hover={{ transform: "scale(1.05)", bg: tempDifficulty === level ? undefined : "blue.50" }}
+                  transition="all 0.2s"
+                >
+                  {level}
+                </Button>
+              ))}
+            </HStack>
+          </Box>
 
-              <Button onClick={() => setTempCount(null)} colorScheme="gray" variant="ghost" size={{ base: "sm", md: "md" }}>
-                ← {t("additionTest.back")}
-              </Button>
-            </>
+          {/* Start Button */}
+          {tempCount && tempDifficulty && (
+            <Button
+              onClick={startGame}
+              colorScheme="green"
+              size={{ base: "md", md: "lg" }}
+              fontSize={{ base: "xl", md: "2xl" }}
+              px={{ base: 8, md: 12 }}
+              py={{ base: 6, md: 8 }}
+              _hover={{ transform: "scale(1.05)" }}
+              transition="all 0.2s"
+            >
+              {t("practicePage.start")}
+            </Button>
           )}
         </VStack>
       </Container>
@@ -819,10 +941,12 @@ export default function MathTest({ testConfig }: MathTestProps) {
           <HStack spacing={{ base: 2, md: 4 }} width="100%" flexWrap="wrap">
             <Button
               onClick={() => {
+                setHasStarted(false);
                 setMaxExercises(null);
                 setDifficulty(null);
                 setUserAnswer("");
-                setTempCount(null);
+                setTempCount(settings.defaultTestCount);
+                setTempDifficulty(settings.defaultDifficulty);
               }}
               colorScheme="blue"
               size={{ base: "md", md: "lg" }}

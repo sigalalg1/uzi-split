@@ -245,6 +245,88 @@ export default function Settings() {
 
             <Divider />
 
+            {/* Default Test Count */}
+            <Box>
+              <HStack spacing={2} mb={3}>
+                <Heading size="md" color="gray.700">
+                  {t('settings.defaultTestCount')}
+                </Heading>
+                <Badge colorScheme="orange">
+                  {settings.defaultTestCount === null ? t('settings.manual') : settings.defaultTestCount}
+                </Badge>
+              </HStack>
+
+              <Text color="gray.600" mb={4} fontSize="sm">
+                {t('settings.defaultTestCountDescription')}
+              </Text>
+
+              <HStack spacing={3} flexWrap="wrap">
+                {[null, 5, 10, 15, 20, 25].map((count) => (
+                  <Button
+                    key={count === null ? 'null' : count}
+                    onClick={() => {
+                      updateSettings({ defaultTestCount: count });
+                      toast({
+                        title: t('settings.saved'),
+                        status: 'success',
+                        duration: 2000,
+                        isClosable: true,
+                        position: 'top',
+                      });
+                    }}
+                    colorScheme={settings.defaultTestCount === count ? 'orange' : 'gray'}
+                    variant={settings.defaultTestCount === count ? 'solid' : 'outline'}
+                    size="md"
+                  >
+                    {count === null ? t('settings.manual') : count}
+                  </Button>
+                ))}
+              </HStack>
+            </Box>
+
+            <Divider />
+
+            {/* Default Difficulty */}
+            <Box>
+              <HStack spacing={2} mb={3}>
+                <Heading size="md" color="gray.700">
+                  {t('settings.defaultDifficulty')}
+                </Heading>
+                <Badge colorScheme="orange">
+                  {settings.defaultDifficulty === null ? t('settings.manual') : `${t('practicePage.level')} ${settings.defaultDifficulty}`}
+                </Badge>
+              </HStack>
+
+              <Text color="gray.600" mb={4} fontSize="sm">
+                {t('settings.defaultDifficultyDescription')}
+              </Text>
+
+              <HStack spacing={3} flexWrap="wrap">
+                {[null, 1, 2, 3, 4, 5].map((level) => (
+                  <Button
+                    key={level === null ? 'null' : level}
+                    onClick={() => {
+                      updateSettings({ defaultDifficulty: level });
+                      toast({
+                        title: t('settings.saved'),
+                        status: 'success',
+                        duration: 2000,
+                        isClosable: true,
+                        position: 'top',
+                      });
+                    }}
+                    colorScheme={settings.defaultDifficulty === level ? 'orange' : 'gray'}
+                    variant={settings.defaultDifficulty === level ? 'solid' : 'outline'}
+                    size="md"
+                  >
+                    {level === null ? t('settings.manual') : level}
+                  </Button>
+                ))}
+              </HStack>
+            </Box>
+
+            <Divider />
+
             {/* Info Box */}
             <Box
               p={4}

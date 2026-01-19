@@ -11,7 +11,8 @@
       "numerator": "Numerator",
       "denominator": "Denominator",
       "decimal": "Decimal",
-      "fraction": "Fraction"
+      "fraction": "Fraction",
+      "lcd": "LCD"
     },
     "practicePage": {
       "title": "Practice",
@@ -22,6 +23,7 @@
       "difficultyLevels": "difficulty levels",
       "selectQuestions": "How many questions?",
       "selectDifficulty": "Select difficulty level:",
+      "start": "Start",
       "viewTests": "View Tests",
       "chooseExercise": "Choose an exercise to start practicing",
       "subjectNotFound": "Subject not found",
@@ -607,6 +609,11 @@
       "feedbackDelayDescription": "How long to show the answer before moving to the next question",
       "faster": "Faster",
       "slower": "Slower",
+      "defaultTestCount": "Default Number of Questions",
+      "defaultTestCountDescription": "Pre-select how many questions to answer. You can still adjust before starting. Select 'Manual' for no default.",
+      "defaultDifficulty": "Default Difficulty Level",
+      "defaultDifficultyDescription": "Pre-select the difficulty level for tests. You can still adjust before starting. Select 'Manual' for no default.",
+      "manual": "Manual",
       "tip": "Tip",
       "tipDescription": "Choose 'After Each Question' for learning mode, or 'At End' for test mode",
       "resetDefaults": "Reset to Defaults",

@@ -5,6 +5,8 @@ export type FeedbackTiming = 'afterEach' | 'atEnd';
 interface UserSettings {
   feedbackTiming: FeedbackTiming;
   feedbackDelay: number; // milliseconds
+  defaultTestCount: number | null; // null means user must select
+  defaultDifficulty: number | null; // null means user must select
 }
 
 interface SettingsContextType {
@@ -16,6 +18,8 @@ interface SettingsContextType {
 const defaultSettings: UserSettings = {
   feedbackTiming: 'afterEach',
   feedbackDelay: 800, // Shortened from 1500-2000ms to 800ms
+  defaultTestCount: 10, // Default to 10 questions
+  defaultDifficulty: 3, // Default to level 3 (medium)
 };
 
 const STORAGE_KEY = 'mathPlaceSettings';
